@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+iDoctor | Login
+{% endblock %}
+{% block content %}
+<br>
+<br>
+<br>
+<div class="">
+	<form method="post" class="">
+		{% csrf_token %}
+			{% for message in messages %}
+				{% if message.tags == 'success' %}
+					<div class="d-flex justify-content-center justify-content-md-center">
+						<p class="mb-3 bg-success text-white col-md-4">{{ message }}</p>
+					</div>
+				{% elif message.tags == 'info' %}
+				<div class="d-flex justify-content-center justify-content-md-center">
+					<p class="mb-3 bg-danger text-white col-md-4">{{ message }}</p>
+				</div>
+				{% endif %}
+			{% endfor %}
+		<div class="d-flex justify-content-center justify-content-md-center mb-3">
+			<div class="form-group col-md-4 shadow-sm border rounded p-4 mb-4 bg-white">
+				{{ form.email|as_crispy_field }}
+				{{ form.password|as_crispy_field }}
+				<div class="valid-feedback"></div>
+				<div class="invalid-feedback">Please fill out this field now.</div>
+				<button type="submit" class="btn btn-primary mb-3 w-100">Login</button>
+			</div>
+		</div>
+	</form>
+</div>
+{% endblock %}
+
+</html>

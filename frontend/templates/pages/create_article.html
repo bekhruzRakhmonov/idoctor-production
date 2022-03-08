@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="d-flex justify-content-center justify-content-md-center mt-1" style="width: 100%;">
+    <br>
+    <form method="post" enctype="multipart/form-data">
+        <div class="bg-danger d-flex justify-content-center justify-content-md-center mt-1">
+            {% if messages %}
+            {% for message in messages %}
+            <h6 style="color: white;margin-top: 3px;" >{{message}}</h6>
+            {% endfor %}
+            {% endif %}
+        </div>
+        {% csrf_token %}
+        {{article_form.media}}
+        {{ article_form|crispy }}
+        <button type="submit" class="btn btn-primary w-100">Create</button>
+    </form>
+</div>
+{% endblock %}

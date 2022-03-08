@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Dashboard | {{request.user.name}} {% endblock %}
+{% block content %}
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+
+<div class="container emp-profile">
+    <div class="modal fade" id="exampleModalCenterDashboard" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Change</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="comments-container">
+
+              </div>
+              <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+      </div>
+        </div>
+
+            <form method="post">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="profile-img">
+                            <img src="/media/{{request.user.image}}" alt=""/>
+                            <div class="file btn btn-lg btn-primary">
+                                Change Photo
+                                <input type="file" name="file">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="profile-head">
+                                    <h5>
+                                        {{request.user.name}}
+                                    </h5>
+                                    <h6>
+                                        Web Developer and Designer
+                                    </h6>
+                                    <div class="bg-light p-4 d-flex text-center">
+                                        <ul class="list-inline mb-0">
+                                            <li class="list-inline-item">
+                                                <h5 class="font-weight-bold mb-0 d-block">{{ posts_count }}</h5><small class="text-muted"> <i class="fas fa-image mr-1"></i>Posts</small>
+                                            </li>
+                                            <li class="list-inline-item">
+                                                <h5 class="font-weight-bold mb-0 d-block">{{followers}}</h5><small class="text-muted"> <i class="fas fa-user mr-1"></i>Followers</small>
+                                            </li>
+                                            <li class="list-inline-item">
+                                                <h5 class="font-weight-bold mb-0 d-block">{{articles_count}}</h5><small class="text-muted"> <i class="fas fa-user mr-1"></i>Articles</small>
+                                            </li>
+                                        </ul>
+                                    </div>
+                            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="posts-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Posts</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="articles-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Articles</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-2" style="display: flex;">
+                        <input type="button" class="profile-edit-btn" data-toggle="modal" data-target="#exampleModalCenterDashboard"  value="Edit Profile" style="height: 35px;" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="profile-work">
+                            <p>BIO</p>
+                            <span>{{user.bio}}</span>
+                            <p>SKILLS</p>
+                            <a href="">Web Designer</a><br/>
+                            <a href="">Web Developer</a><br/>
+                            <a href="">WordPress</a><br/>
+                            <a href="">WooCommerce</a><br/>
+                            <a href="">PHP, .Net</a><br/>
+                        </div>
+                    </div>
+                    <div class="col-md-8" style="margin-top:-100px;">
+                        <div class="tab-content profile-tab" id="myTabContent">
+                            <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="home-tab">
+                                    <div class="row">
+                                        {% for post in posts %}
+                                            <div class="card" style="">
+                                                {% if post.text %}
+                                                    <p>{{post.text}}</p>
+                                                {% endif %}
+                                                <small class="text-muted">{{post.pub_date}}</small>
+                                                {% if post.photo %}
+                                                    <img src="/media/{{post.photo}}" style="max-width: 500px;max-height: 500px;">
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                            
+                            </div>
+                            <div class="tab-pane fade" id="articles" role="tabpanel" aria-labelledby="profile-tab">
+                                {% for article in articles %}
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <a href="{% url 'base:article-detail' article.pk %}" style="cursor: pointer;"><label>{{article.headline}}</label></a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p>{{article.date}}</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>           
+        </div>
+    </div>
+    {% for message in messages %}
+        <script type="text/javascript">window.alert("{{message}}")</script>
+    {% endfor %}
+{% endblock %}

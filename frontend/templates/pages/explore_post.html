@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load custom_tags %}
+
+{% block content %}
+<div style="align-items: center;justify-content: center;display: flex;">
+  <div class="card mb-6 card-middle">
+    <div class="card-body card-body-middle mt-6">
+      <div class="modal fade" id="exampleModalCenter2" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Post Comment</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="comments-container">
+
+              </div>
+              <form method="post">
+                {% csrf_token %}
+                {{ comment_form|crispy }}
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Post</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="user-post-details" style="display: flex;justify-content: space-between;">
+        <div style="display:flex;">
+          <img class="post-img" src="/media/{{post.owner.image}}"
+          style="width:50px;height: 50px; object-fit: cover;border-radius: 50%;">
+          <h5 class="card-title" style="display:flex;flex-direction: column; margin-top: 5px;">{{ post.owner.name }}<small
+            class="text-muted">{{ post.pub_date }}</small></h5>
+        </div>
+        {% if request.user == post.owner %}
+            <div class="dropdown">
+              <i class="fas fa-ellipsis-h" id="dropdownMenuLink" onmouseover="this.style.color='blue'" onmouseout="this.style.color='black'" style="font-size:20px;cursor: pointer;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-left: -140px;">
+                <a class="dropdown-item" href="{% url 'base:edit-post' post.post_id request.user.user_id %}">Edit</a>
+                <a class="dropdown-item" href="{% url 'base:delete-post' post.post_id request.user.user_id %}">Delete</a>
+                <a class="dropdown-item" value="{{request.get_full_path}}" id="copyPostLink">Copy link</a>
+                <input type="text" value="{{request.get_host}}{{request.get_full_path}}" id="copyPostLinkValue" style="display:none;">
+              </div>
+            </div>
+          {% endif %}
+      </div>
+      <p class="card-text">{{ post.text }}</p>
+      {% if post.photo %}
+      <img class="card-img-bottom" src="{{ post.photo.url }}" alt="Card image cap">
+      {% endif %}
+    </div>
+    <div class="card-footer bg-white">
+      {% for comment in post.post_comment.all %}
+      <b>{{comment.user}}</b>
+        {% for c in comment.comment.all|dictsort:"date" %}
+          <p>{{c.content}} <em> {{c.date}}</em></p>
+        {% endfor %}
+      {% endfor %}
+      <form method="post" action="{% url 'base:post-comment-view' post.post_id %}">
+        {% csrf_token %}
+        <input type="text" name="comment-text" style="width:400px;">
+        <button style="height:30px;width: 50px;border: 0;border-radius: 5px;background-color: blue;color: white;" type="submit">Post</button>
+      </form>
+      <hr>
+      <div class="row">
+        <div class="col-sm d-flex justify-content-center">
+          <form method="get">
+          <a href="/like/{{post.post_id}}/" style="color:black;">
+            {% if request.user|filter_user%}
+              {% for like in post.post_id|filter_like %}
+                <i class="fa{{like}} fa-thumbs-up" style="font-size: 30px;"></i>
+              {% endfor %}
+            {% endif %}
+          </a>
+          <em>{{post.post_id|filter_like_count}}</em>
+          </form>
+        </div>
+        <div class="col-sm  d-flex justify-content-center" style="color:black;" data-toggle="modal"
+          data-target="#exampleModalCenter2" id="comment">
+          <i class="far fa-comments" style="font-size: 30px;"><input type="hidden" value="{{post.post_id}}"></i>
+        </div>
+        <div class="col-sm d-flex justify-content-center"><a href="#" style="color:black;"><i
+              class="far fa-share-square" style="font-size: 30px;"></i></a></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

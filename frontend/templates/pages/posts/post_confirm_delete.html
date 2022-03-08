@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-center" style="margin-top: 50px;">
+    <form method="post">
+        {% csrf_token %}
+        <p>Are you sure you want to delete "{{ object }}"?</p>
+        <button class="btn btn-danger" type="submit">Yes, I'm sure</button>
+        <a href="{{back}}"><button class="btn btn-secondary" type="button">No, take me back</button></a>
+    </form>
+</div>
+{% endblock %}

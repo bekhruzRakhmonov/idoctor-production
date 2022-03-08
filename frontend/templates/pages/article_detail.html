@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+
+{% block content %}
+    <div class="container card" style="width:650px;">
+        <h4>{{article.author}}</h4>
+        <headline style="font-size: 26px;">{{article.headline}}</headline>
+        {% if request.user == article.author %}
+          <div class="dropdown">
+            <i class="fas fa-ellipsis-h" id="dropdownMenuLink" onmouseover="this.style.color='blue'" onmouseout="this.style.color='black'" style="font-size:20px;cursor: pointer;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-left: -140px;">
+              <a class="dropdown-item" href="{% url 'base:edit-article' article.id %}">Edit</a>
+              <a class="dropdown-item" href="{% url 'base:delete-article' article.id %}">Delete</a>
+            </div>
+          </div>
+        {% endif %}
+        <br>
+        <body>{{article.body|safe}}</body>
+        <div class="card-footer bg-white">
+      {% for comment in article.article_comment.all %}
+      <b>{{comment.user}}</b>
+        {% for c in comment.comment.all %}
+          <p>{{c.content}} <em> {{c.date}}</em></p>
+        {% endfor %}
+      {% endfor %}
+      <form method="post" action="{% url 'base:article-comment-view' article.id %}">
+        {% csrf_token %}
+        <input type="text" name="comment-text" style="width:400px;">
+        <button style="height:30px;width: 50px;border: 0;border-radius: 5px;background-color: blue;color: white;" type="submit">Post</button>
+      </form>
+      <hr>
+      <div class="row">
+        <div class="col-sm d-flex justify-content-center">
+          <form method="get">
+          <a href="/like-article/{{article.id}}/" style="color:black;">
+            {% if request|filter_user%}
+              {% if article.likes.all %}
+                <i class="fa{{article.likes.all|filter_like}} fa-thumbs-up" style="font-size: 30px;"></i>
+              {% else %}
+                <i class="far fa-thumbs-up" style="font-size: 30px;"></i>
+              {% endif %}
+            {% endif %}
+          </a>
+          <em>{{article.likes.all.count}}</em>
+          </form>
+        </div>
+        <div class="col-sm  d-flex justify-content-center" style="color:black;" data-toggle="modal"
+          data-target="#exampleModalCenter2" id="comment">
+          <i class="far fa-comments" style="font-size: 30px;"><input type="hidden" value="{{post.post_id}}"></i>
+        </div>
+        <div class="col-sm d-flex justify-content-center"><a href="#" style="color:black;"><i
+              class="far fa-share-square" style="font-size: 30px;"></i></a></div>
+      </div>
+    </div>
+    </div>
+    {% for related_article in related_articles %}
+      <h1>{{related_article.headline}}</h1>
+    {% endfor %}
+{% endblock %}
