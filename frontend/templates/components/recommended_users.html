@@ -4,7 +4,7 @@
     <div class="card-body" style="overflow-y:auto;">
         {% if users|length != 0 %}
         {% for user in users %}
-            {% if user.email != request.user.email and request.user.email|filter_user %}
+            {% if user.email != request.user.email and request|filter_user %}
                 <a href="users/{{user.name|slugify}}/{{user.pk}}/">
                 <div class="card" style="width: 15rem;">
                     <img class="custom-card-img-top" src="media/{{user.image}}" alt="Card image cap" >
