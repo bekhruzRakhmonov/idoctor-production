@@ -1,15 +1,17 @@
 {% load crispy_forms_tags %}
 {% load custom_tags %}
 
-<div>
+<div style="width: 480px;">
+  {% if request.user.is_authenticated %}
   <div
     style="display:flex;flex-direction: row; margin-top: 5px; background-color: white;margin-top: 15px; height: 70px; align-items: center; border-radius: 5px; border:0px solid black;min-width: 1.25rem;">
     <img src="/media/{{request.user.image}}" style="width:50px;height: 50px; object-fit: cover;border-radius: 50%;margin-left: 13px;">
     <input type="text" class="form-control" placeholder="Write post or article..." data-toggle="modal"
       data-target="#exampleModalCenter" style="width:80%;margin-left: 20px;" />
   </div>
+  {% endif %}
   {% for post in posts %}
-  <div class="card mb-6 card-middle">
+  <div class="card mb-6 card-middle" style="width: 480px;">
     <div class="card-body card-body-middle mt-6">
       <div class="modal fade" id="exampleModalCenter2" tabindex="-1" role="dialog"
         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -71,7 +73,7 @@
       {% endfor %}
       <form method="post" action="{% url 'base:post-comment-view' post.post_id %}">
         {% csrf_token %}
-        <input type="text" name="comment-text" style="width:400px;">
+        <input type="text" name="comment-text" style="width:380px;">
         <button style="height:30px;width: 50px;border: 0;border-radius: 5px;background-color: blue;color: white;" type="submit">Post</button>
       </form>
       <hr>

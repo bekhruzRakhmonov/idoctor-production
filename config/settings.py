@@ -32,9 +32,11 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1","7898-84-54-122-6.ngrok.io"]
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
+
+CSRF_TRUSTED_ORIGINS = ["https://8000-bekhruzrakhmono-idoctor-vzn6jybfk71.ws-eu34.gitpod.io"]
 
 INSTALLED_APPS = [
     "channels",
@@ -97,7 +99,10 @@ WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
     },
 }
 
@@ -143,12 +148,12 @@ SIMPLE_JWT = {
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "idoctor",
-        "USER": "postgres",
-        "PASSWORD": "Idonotknow1@",
-        "HOST": "localhost",
-        "PORT": "5555",
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_NAME'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
 
@@ -239,8 +244,6 @@ LOGOUT_REDIRECT_URL = "/login/"
 ATOMIC_REQUESTS = True
 #AUTOCOMMIT = False
 # email
-
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # ckeditor
 

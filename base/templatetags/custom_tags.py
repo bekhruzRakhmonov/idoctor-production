@@ -59,8 +59,9 @@ def filter(value):
 
 @register.filter(name="check_followed")
 def check_followed(follower):
-    global user
-    request_user = User.objects.get(email=user)
+    global request
+    print(request)
+    request_user = request.user
     followed = True
     try:
         Follower.objects.get(user__exact=follower,follower__exact=request_user)
