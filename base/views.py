@@ -185,7 +185,7 @@ class PostCommentView(View):
                 comment.save()
         elif comment_created:
             comment.comment.add(child_comment)
-        return redirect(reverse_lazy("main"))
+        return redirect(reverse_lazy("base:main"))
 
 class PostCommentArticleView(View):
     @transaction.atomic
