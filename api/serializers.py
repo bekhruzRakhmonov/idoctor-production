@@ -124,7 +124,12 @@ class CommentSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ["owner","text","photo","likes"]
+        fields = ["text","post","likes"]
+
+class CreatePostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ["owner","text","photo"]
         
     def to_internal_value(self, data):
         useful_data = {}

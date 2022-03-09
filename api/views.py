@@ -14,7 +14,7 @@ from django.db.models import Q
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.hashers import make_password
 from base.models import User,Comment,ChildComment,Post,Article,CommentArticle,ChildCommentArticle,Like
-from .serializers import UserSerializer,PostSerializer,CommentSerializer,CustomTokenObtainPairSerializer,CreateCommentSerializer,ArticleSerializer,CreateArticleSerializer,ArticleCommentSerializer,ArticleCommentsSerializer,LikePostSerializer,LikeArticleSerializer,UserPasswordChangeSerializer,UserPasswordResetEmailSerializer,UserPasswordResetSerializer, FollowerSerializer
+from .serializers import UserSerializer,PostSerializer,CreatePostSerializer,CommentSerializer,CustomTokenObtainPairSerializer,CreateCommentSerializer,ArticleSerializer,CreateArticleSerializer,ArticleCommentSerializer,ArticleCommentsSerializer,LikePostSerializer,LikeArticleSerializer,UserPasswordChangeSerializer,UserPasswordResetEmailSerializer,UserPasswordResetSerializer, FollowerSerializer
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -31,13 +31,19 @@ class CreateUser(CreateAPIView):
             serializer.save()
         return Response(serializer.data)
 
+class GetPost(ListAPIView):
+    serializer_class = PostSerializer
+
+    def initial(self,request,*args,**kwargs):
+        pass
+
 class CreatePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [parsers.MultiPartParser,parsers.JSONParser]    
 
     def get(self,request):
         queryset = Post.objects.all()
-        serializer = PostSerializer(queryset,many=True)
+        serializer = CreatePostSerializer(queryset,many=True)
         return Response(serializer.data)
 
     def post(self,request,*args,**kwargs):

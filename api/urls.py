@@ -13,6 +13,7 @@ urlpatterns = [
     path('password-reset/<uuid:user_id>/',views.UserPasswordResetView.as_view(),name="password-reset"),
 
     # post
+    path('get-post/',views.GetPost.as_view(),name="get-post"),
 	path('create-post/',views.CreatePostView.as_view(),name="create-post-api"),
 	path('get-comment/',views.GetComment.as_view(),name="get-comment"),
 	path('get-comment/<int:pk>/',views.GetCommentById.as_view(),name="get-comment-by-id"),
