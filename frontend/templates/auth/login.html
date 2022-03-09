@@ -29,6 +29,8 @@ iDoctor | Login
 				<div class="valid-feedback"></div>
 				<div class="invalid-feedback">Please fill out this field now.</div>
 				<button type="submit" class="btn btn-primary mb-3 w-100">Login</button>
+				<a href="{% url "base:register" %}">I do not have account yet.</a><span style="margin-left: 20px;margin-right: 20px;">|</span>
+				<a href="{% url "base:password-reset" %}">Forgot a password</a>
 			</div>
 		</div>
 	</form>

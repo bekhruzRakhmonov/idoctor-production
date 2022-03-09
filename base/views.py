@@ -585,22 +585,22 @@ class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     template_name = "auth/password_change.html"
     success_url = reverse_lazy("dashboard")
 
-
-class UserPasswordResetView(LoginRequiredMixin, PasswordResetView):
+class UserPasswordResetView(PasswordResetView):
     form_class = PasswordResetForm
     template_name = "auth/password_reset.html"
-    success_url = reverse_lazy("password_reset_done")
+    email_template_name = "auth/password_reset_email.html"
+    success_url = reverse_lazy("base:password-reset-done")
 
 
-class UserPasswordResetDoneView(LoginRequiredMixin, PasswordResetDoneView):
+class UserPasswordResetDoneView(PasswordResetDoneView):
     template_name = "auth/password_reset_done.html"
 
 
-class UserPasswordResetConfirmView(LoginRequiredMixin, PasswordResetConfirmView):
+class UserPasswordResetConfirmView(PasswordResetConfirmView):
     form_class = UserSetPasswordForm
     template_name = "auth/password_reset_confirm.html"
-    success_url = reverse_lazy("password_reset_complete")
+    success_url = reverse_lazy("base:password-reset-complete")
 
 
-class UserPasswordResetCompleteView(LoginRequiredMixin, PasswordResetCompleteView):
+class UserPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = "auth/password_reset_complete.html"

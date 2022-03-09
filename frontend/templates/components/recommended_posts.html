@@ -10,6 +10,9 @@
       data-target="#exampleModalCenter" style="width:80%;margin-left: 20px;" />
   </div>
   {% endif %}
+  {% if not posts %}
+    <h1 style="text-align: center;">No posts yet</h1>
+  {% endif %}
   {% for post in posts %}
   <div class="card mb-6 card-middle" style="width: 480px;">
     <div class="card-body card-body-middle mt-6">
