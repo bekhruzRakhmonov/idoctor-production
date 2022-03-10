@@ -20,7 +20,6 @@ class CustomBackend(BaseBackend):
         else:
             try:
                 user = User.objects.get(email=email)
-                print("checking user password:",user.check_password(password))
                 if user.check_password(password):
                     return user
                 raise ValidationError("Password is incorrect!")
