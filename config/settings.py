@@ -60,8 +60,8 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "base.User"
 AUTHENTICATION_BACKENDS = ["base.backends.CustomBackend"]
-ADMIN_LOGIN = "bekhruzrakhmonov2@gmail.com"
-ADMIN_PASSWORD = "Idonotknow1@"
+ADMIN_LOGIN = os.getenv("ADMIN_LOGIN")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -113,7 +113,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        #"rest_framework.authentication.SessionAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     )
 }
@@ -242,7 +241,7 @@ LOGIN_URL = "/login/"
 LOGOUT_REDIRECT_URL = "/login/"
 
 ATOMIC_REQUESTS = True
-#AUTOCOMMIT = False
+# AUTOCOMMIT = False
 # email
 
 # ckeditor
