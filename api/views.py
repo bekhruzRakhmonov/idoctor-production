@@ -33,6 +33,7 @@ class CreateUser(CreateAPIView):
 
 class GetPost(ListAPIView):
     serializer_class = PostSerializer
+    permission_classes = [permissions.AllowAny]
 
     def initial(self,request,*args,**kwargs):
         
