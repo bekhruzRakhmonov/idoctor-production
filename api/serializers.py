@@ -126,7 +126,7 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ["text","post","likes"]
 
-class CreatePostSerializer(serializers.ModelSerializer):
+class CreateAndUpdatePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ["owner","text","photo"]

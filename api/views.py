@@ -14,7 +14,7 @@ from django.db.models import Q
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.hashers import make_password
 from base.models import User,Comment,ChildComment,Post,Article,CommentArticle,ChildCommentArticle,Like
-from .serializers import UserSerializer,PostSerializer,CreatePostSerializer,CommentSerializer,CustomTokenObtainPairSerializer,CreateCommentSerializer,ArticleSerializer,CreateArticleSerializer,ArticleCommentSerializer,ArticleCommentsSerializer,LikePostSerializer,LikeArticleSerializer,UserPasswordChangeSerializer,UserPasswordResetEmailSerializer,UserPasswordResetSerializer, FollowerSerializer
+from .serializers import UserSerializer,PostSerializer,CreateAndUpdatePostSerializer,CommentSerializer,CustomTokenObtainPairSerializer,CreateCommentSerializer,ArticleSerializer,CreateArticleSerializer,ArticleCommentSerializer,ArticleCommentsSerializer,LikePostSerializer,LikeArticleSerializer,UserPasswordChangeSerializer,UserPasswordResetEmailSerializer,UserPasswordResetSerializer, FollowerSerializer
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -60,22 +60,26 @@ class CreatePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [parsers.MultiPartParser,parsers.JSONParser]    
 
-    def get(self,request):
-        queryset = Post.objects.all()
-        serializer = CreatePostSerializer(queryset,many=True)
-        return Response(serializer.data)
-
     def post(self,request,*args,**kwargs):
-        print("Stream: ",dir(request.stream))
         stream = request.stream
-        print("Request Data:",request.data)
         text = request.data.get("text",None)
         photo = request.data.get("photo",None)
-        serializer = PostSerializer(data=request.data,owner=request.user,context={"request":request})
+        serializer = CreateAndUpdatePostSerializer(data=request.data,owner=request.user,context={"request":request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
+
+
+    def put(self,request,*args,**kwargs):
+        queryset = Post.objects.all()
+        serializer = CreateAndUpdatePostSerializer(queryset=queryset,data=request.data,owner=request.user,context={"request":request},many=True)
+
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_200_OK)
+
+        return Response(serializer.data)
 
 class CreateComment(CreateAPIView):
     serializer_class = CreateCommentSerializer
