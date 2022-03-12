@@ -61,7 +61,7 @@
                                         style="width: 50px;height: 50px;object-fit: cover;"></div>
                             </div>
                             <div class="col-md-9 col-sm-9 col-xs-9 pd-l0">
-                                <a href="{% url base:user-profile-showcase notf.from_user.name notf.from_user.pk %}">{{notf.from_user}}</a>
+                                <a href="{% url 'base:user-profile-showcase' notf.from_user.name notf.from_user.pk %}">{{notf.from_user}}</a>
                                 {% if notf.notf_type == "comment" %} wrote comment to your post
                                 <a href="posts/post-{{notf.notf_comment.post.post_id}}">
                                     {{notf.notf_comment.post}}
