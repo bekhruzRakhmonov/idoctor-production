@@ -5,6 +5,9 @@ from django.db.models.signals import post_save,pre_save
 @receiver(post_save,sender=Follower)
 def handle_follower(sender,**kwargs):
     instance = kwargs["instance"]
+    print("notification",dir(instance.follower),instance.follower.name)
+    for i in instance.follower.all():
+        print(i)
     obj,created = Notification.objects.get_or_create(from_user=instance.follower.last(),to_user=instance.user,notf_follower=instance,notf_type="following")
 
 @receiver(post_save,sender=Post)

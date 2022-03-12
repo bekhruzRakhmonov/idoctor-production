@@ -393,7 +393,7 @@ class DashboardView(LoginRequiredMixin, View, ContextMixin):
 
     def get(self, request, user,**kwargs):
         ctx = self.get_context_data()
-        form = ChangeUserForm
+        form = ChangeUserForm(initial={'name':request.user.name,'email':request.user.email,"image":request.user.image})
         context = {
             "followers": ctx["followers"],
             "posts": ctx["posts"],

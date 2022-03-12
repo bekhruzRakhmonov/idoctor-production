@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-md bg-white navbar-dark" style="justify-content: space-between;">
-        <a class="navbar-brand" style="color:black;" href="#">iDoctor</a>
-        <form method="get" action="{% url 'base:search' %}">
-            <div class="search-container">
+    <a class="navbar-brand" style="color:black;" href="#">iDoctor</a>
+    <form method="get" action="{% url 'base:search' %}">
+        <div class="search-container">
             <input type="text" placeholder="Search.." name="q" style="padding: 6px;
                 margin-top: 8px;
                 font-size: 17px;
@@ -21,83 +21,96 @@
               height: 40px;
               border: 1px solid black;
       " id="search-btn"><i class="fa fa-search"></i></button>
-            </div>
-        </form>
-        {% if request.user.is_authenticated %}
-        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-content: stretch;justify-content: space-evenly;align-items: center;">
-            <div>
-                <a class="mr-5" id="home" href="/" style="color:black;"><i class="fas fa-home" style="font-size:26px;"></i></a>                
-                <a class="mr-5" id="dashboard" href="{% url 'base:dashboard' request.user.name|slugify request.user.pk %}" style="color:black;"><i class="fas fa-chart-line" style="font-size:26px;"></i></a>
-                <a class="mr-5" id="chat" href="/chat/" style="color:black;"><i class="fas fa-comment" style="font-size:26px;"></i></a>
-                <a class="mr-5" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="notf" href="#" style="color:black;"><i class="fas fa-bell" style="font-size:26px;position: relative;">
+        </div>
+    </form>
+    {% if request.user.is_authenticated %}
+    <div
+        style="display: flex;flex-direction: row;flex-wrap: wrap;align-content: stretch;justify-content: space-evenly;align-items: center;">
+        <div>
+            <a class="mr-5" id="home" href="/" style="color:black;"><i class="fas fa-home"
+                    style="font-size:26px;"></i></a>
+            <a class="mr-5" id="dashboard" href="{% url 'base:dashboard' request.user.name|slugify request.user.pk %}"
+                style="color:black;"><i class="fas fa-chart-line" style="font-size:26px;"></i></a>
+            <a class="mr-5" id="chat" href="/chat/" style="color:black;"><i class="fas fa-comment"
+                    style="font-size:26px;"></i></a>
+            <a class="mr-5" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="notf"
+                href="#" style="color:black;"><i class="fas fa-bell" style="font-size:26px;position: relative;">
                     {% if notf_count != 0 %}
-                        <span class="badge badge-danger" style="font-size: 0.75rem;position: absolute;left: 10px;top: -10px;font-family: sans-serif;">{{notf_count}}
-                        </span>
+                    <span class="badge badge-danger"
+                        style="font-size: 0.75rem;position: absolute;left: 10px;top: -10px;font-family: sans-serif;">{{notf_count}}
+                    </span>
                     {% endif %}
                 </i></a>
-<div class="dropdown">
-      <ul class="dropdown-menu notify-drop">
-            <div class="notify-drop-title">
-                <div class="row">
-                    <div class="col-md-6 col-sm-6 col-xs-6">Notifications (<b>{{notf_count}}</b>)</div>
-                    <div class="col-md-6 col-sm-6 col-xs-6 text-right"><a href="" class="rIcon allRead" data-tooltip="tooltip" data-placement="bottom" title="tümü okundu."><i class="fa fa-dot-circle-o"></i></a></div>
-                </div>
-            </div>
-            <!-- end notify title -->
-            <!-- notify content -->
-            <div class="drop-content">
-                {% for notf in notifications %}
-                    <li style="display: flex;">
-                        <div class="col-md-3 col-sm-3 col-xs-3"><div class="notify-img"><img src="/media/{{notf.from_user.image}}" alt="" style="width: 50px;height: 50px;object-fit: cover;"></div></div>
-                        <div class="col-md-9 col-sm-9 col-xs-9 pd-l0"><a href="{% url 'base:user-profile-showcase' notf.from_user.name notf.from_user.pk %}">{{notf.from_user}}</a>
-                            {% if notf.notf_type == "comment" %} wrote comment to your post 
+            <div class="dropdown">
+                <ul class="dropdown-menu notify-drop">
+                    <div class="notify-drop-title">
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6 col-xs-6">Notifications (<b>{{notf_count}}</b>)</div>
+                            <div class="col-md-6 col-sm-6 col-xs-6 text-right"><a href="" class="rIcon allRead"
+                                    data-tooltip="tooltip" data-placement="bottom" title="tümü okundu."><i
+                                        class="fa fa-dot-circle-o"></i></a></div>
+                        </div>
+                    </div>
+                    <!-- end notify title -->
+                    <!-- notify content -->
+                    <div class="drop-content">
+                        {% for notf in notifications %}
+                        <li style="display: flex;">
+                            <div class="col-md-3 col-sm-3 col-xs-3">
+                                <div class="notify-img"><img src="/media/{{notf.from_user.image}}" alt=""
+                                        style="width: 50px;height: 50px;object-fit: cover;"></div>
+                            </div>
+                            <div class="col-md-9 col-sm-9 col-xs-9 pd-l0">
+                                <a href="{% url base:user-profile-showcase notf.from_user.name notf.from_user.pk %}">{{notf.from_user}}</a>
+                                {% if notf.notf_type == "comment" %} wrote comment to your post
                                 <a href="posts/post-{{notf.notf_comment.post.post_id}}">
                                     {{notf.notf_comment.post}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
-                            {% elif notf.notf_type == "like" %}
-                            liked to your post 
+                                {% elif notf.notf_type == "like" %}
+                                liked to your post
                                 <a href="posts/post-{{notf.notf_comment.post.post_id}}">
                                     {{notf.notf_like.post}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
-                            {% elif notf.notf_type == "post" %}
+                                {% elif notf.notf_type == "post" %}
                                 posted a new post
                                 <a href="posts/post-{{notf.notf_post.post_id}}">
                                     {{notf.notf_post}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
-                            {% elif notf.notf_type == "article" %}
+                                {% elif notf.notf_type == "article" %}
                                 published a new article
                                 <a href="posts/post-{{notf.notf_post.post_id}}">
                                     {{notf.notf_article}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
-                            {% elif notf.notf_type == "comment_article" %}
+                                {% elif notf.notf_type == "comment_article" %}
                                 wrote comment to your article
                                 <a href="{% url 'base:article-detail' notf.notf_comment_article.article.pk %}">
                                     {{notf.notf_comment_article.article.headline}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
-                            {% elif notf.notf_type == "following" %}
+                                {% elif notf.notf_type == "following" %}
                                 started following you
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
-                            {% endif %}
-                        <hr>
-                        <p class="time">{{notf.date}}</p>
-                        </div>
-                    </li>
-                {% endfor %}
+                                {% endif %}
+                                <hr>
+                                <p class="time">{{notf.date}}</p>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </div>
+                    <div class="notify-drop-footer text-center">
+                        <a href="#">Show all</a>
+                    </div>
+                </ul>
             </div>
-            <div class="notify-drop-footer text-center">
-                <a href="#">Show all</a>
-            </div>
-          </ul>
-</div>
-            </div>
-            <div class="user-details" style="background-color: wheat; border-radius: 15px; cursor: pointer;">
-                <img class="user-pic" style="width:40px;height: 40px;border-radius: 50%; object-fit: cover;" src="/media/{{request.user.image}}">
-                <span class="mr-5">{{request.user.name}}</span>
+        </div>
+        <div class="user-details" style="background-color: wheat; border-radius: 15px; cursor: pointer;">
+            <img class="user-pic" style="width:40px;height: 40px;border-radius: 50%; object-fit: cover;"
+                src="/media/{{request.user.image}}">
+            <span class="mr-5">{{request.user.name}}</span>
         </div>
         <div class="dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
@@ -111,14 +124,18 @@
             </div>
         </div>
         {% else %}
-        <div style="display: flex;flex-direction: row;flex-wrap: wrap;align-content: stretch;justify-content: space-evenly;align-items: center;">
+        <div
+            style="display: flex;flex-direction: row;flex-wrap: wrap;align-content: stretch;justify-content: space-evenly;align-items: center;">
             <div>
-                <a class="mr-5" id="home" href="#" style="color:black;"><i class="fas fa-home" style="font-size:26px;"></i></a>                
-                <a class="mr-5" id="chat" href="{% url 'base:chat-room' %}" style="color:black;"><i class="fas fa-comment" style="font-size:26px;"></i></a>
-                <a class="mr-5" id="notf" href="#" style="color:black;"><i class="fas fa-bell" style="font-size:26px;"></i></a>
+                <a class="mr-5" id="home" href="#" style="color:black;"><i class="fas fa-home"
+                        style="font-size:26px;"></i></a>
+                <a class="mr-5" id="chat" href="{% url 'base:chat-room' %}" style="color:black;"><i
+                        class="fas fa-comment" style="font-size:26px;"></i></a>
+                <a class="mr-5" id="notf" href="#" style="color:black;"><i class="fas fa-bell"
+                        style="font-size:26px;"></i></a>
             </div>
             <a href="{% url 'base:login' %}"><i class="fas fa-sign-in-alt" style="font-size: 26px;"></i></a>
         </div>
         {% endif %}
     </div>
-    </nav>
+</nav>
