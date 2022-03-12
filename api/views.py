@@ -65,14 +65,21 @@ class GetPostById(GenericAPIView):
         serializer = PostSerializer(post,many=False,context={"request":request})
         return Response(serializer.data)
     
-    def put(self,request,*args,**kwargs):
+    def patch(self,request,*args,**kwargs):
         post = self.get_object()
         if request.user == post.owner:
-            serializer = PostSerializer(data=request.data,many=False)
+            serializer = PostSerializer(post,data=request.data,many=False,partial=True,context={"request":request})
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
-                return Response(serializer.data,status.status.HTTP_201_CREATED)
+                return Response(serializer.data,status=status.HTTP_201_CREATED)
             return Response(serializer.data)
+        return Response({"error":"Access denied."},status=status.HTTP_403_FORBIDDEN)
+    
+    def delete(self,request,*args,**kwargs):
+        post = self.get_object()
+        if request.user == post.owner:
+            post.delete()
+            return Response("Your post is successfully deleted.")
         return Response({"error":"Access denied."},status=status.HTTP_403_FORBIDDEN)
 
 class CreatePostView(APIView):
@@ -83,7 +90,7 @@ class CreatePostView(APIView):
         stream = request.stream
         text = request.data.get("text",None)
         photo = request.data.get("photo",None)
-        serializer = CreateSerializer(data=request.data,owner=request.user,context={"request":request})
+        serializer = CreatePostSerializer(data=request.data,owner=request.user,context={"request":request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
