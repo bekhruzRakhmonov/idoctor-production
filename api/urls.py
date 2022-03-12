@@ -14,7 +14,8 @@ urlpatterns = [
 
     # post
     path('get-post/',views.GetPost.as_view(),name="get-post"),
-	path('create-post/',views.CreateAndUpdatePostView.as_view(),name="create-post"),
+    path('get-post/<uuid:pk>/',views.GetPostById.as_view(),name="get-post-by-id"),
+	path('create-post/',views.CreatePostView.as_view(),name="create-post"),
 	path('get-comment/',views.GetComment.as_view(),name="get-comment"),
 	path('get-comment/<int:pk>/',views.GetCommentById.as_view(),name="get-comment-by-id"),
 	path('create-comment/',views.CreateComment.as_view(),name="create-comment"),

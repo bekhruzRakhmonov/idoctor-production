@@ -122,11 +122,12 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PostSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name="get-post-by-id")
     class Meta:
         model = Post
-        fields = ["text","post","likes"]
+        fields = ["url","owner","text","likes"]
 
-class CreateAndUpdatePostSerializer(serializers.ModelSerializer):
+class CreatePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ["owner","text","photo"]
@@ -148,17 +149,12 @@ class CreateAndUpdatePostSerializer(serializers.ModelSerializer):
                     elements.append((el.user.email,(child_comment.content,child_comment.date)))
         representation["comments"] = elements        
         return representation
-    
-    def update(self,instance,validated_data):
-        instance.text = validated_data.get("text")
-        instance.photo = validated_data.get("photo")
-        return instance
+
 
     def __init__(self,owner,*args,**kwargs):
-        super(PostSerializer,self).__init__(*args,**kwargs)
+        super().__init__(*args,**kwargs)
         self.fields["owner"].default = owner
         self.fields["owner"].required = False
-
 
 class ChildCommentSerializer(serializers.ModelSerializer):
     class Meta:

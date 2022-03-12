@@ -6,7 +6,7 @@ import json
 from rest_framework import authentication,permissions,status,reverse
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveAPIView,CreateAPIView,ListAPIView,UpdateAPIView
+from rest_framework.generics import GenericAPIView,RetrieveAPIView,CreateAPIView,ListAPIView,UpdateAPIView
 from rest_framework.response import Response
 from rest_framework import parsers
 from django.core.serializers import serialize
@@ -14,7 +14,7 @@ from django.db.models import Q
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.hashers import make_password
 from base.models import User,Comment,ChildComment,Post,Article,CommentArticle,ChildCommentArticle,Like
-from .serializers import UserSerializer,PostSerializer,CreateAndUpdatePostSerializer,CommentSerializer,CustomTokenObtainPairSerializer,CreateCommentSerializer,ArticleSerializer,CreateArticleSerializer,ArticleCommentSerializer,ArticleCommentsSerializer,LikePostSerializer,LikeArticleSerializer,UserPasswordChangeSerializer,UserPasswordResetEmailSerializer,UserPasswordResetSerializer, FollowerSerializer
+from .serializers import UserSerializer,PostSerializer,CreatePostSerializer,CommentSerializer,CustomTokenObtainPairSerializer,CreateCommentSerializer,ArticleSerializer,CreateArticleSerializer,ArticleCommentSerializer,ArticleCommentsSerializer,LikePostSerializer,LikeArticleSerializer,UserPasswordChangeSerializer,UserPasswordResetEmailSerializer,UserPasswordResetSerializer, FollowerSerializer
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -34,6 +34,7 @@ class CreateUser(CreateAPIView):
 class GetPost(ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.AllowAny]
+    queryset = Post.objects.all()
 
     def initial(self,request,*args,**kwargs):
         
@@ -56,7 +57,25 @@ class GetPost(ListAPIView):
         self.check_permissions(request)
         self.check_throttles(request)
 
-class CreateAndUpdatePostView(APIView):
+class GetPostById(GenericAPIView):
+    queryset = Post.objects.all()
+
+    def get(self,request,*args,**kwargs):
+        post = self.get_object()
+        serializer = PostSerializer(post,many=False,context={"request":request})
+        return Response(serializer.data)
+    
+    def put(self,request,*args,**kwargs):
+        post = self.get_object()
+        if request.user == post.owner:
+            serializer = PostSerializer(data=request.data,many=False)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data,status.status.HTTP_201_CREATED)
+            return Response(serializer.data)
+        return Response({"error":"Access denied."},status=status.HTTP_403_FORBIDDEN)
+
+class CreatePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [parsers.MultiPartParser,parsers.JSONParser]    
 
@@ -64,22 +83,11 @@ class CreateAndUpdatePostView(APIView):
         stream = request.stream
         text = request.data.get("text",None)
         photo = request.data.get("photo",None)
-        serializer = CreateAndUpdatePostSerializer(data=request.data,owner=request.user,context={"request":request})
+        serializer = CreateSerializer(data=request.data,owner=request.user,context={"request":request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
-
-
-    def put(self,request,*args,**kwargs):
-        queryset = Post.objects.all()
-        serializer = CreateAndUpdatePostSerializer(queryset=queryset,data=request.data,owner=request.user,context={"request":request},many=True)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data,status=status.HTTP_200_OK)
-
-        return Response(serializer.data)
 
 class CreateComment(CreateAPIView):
     serializer_class = CreateCommentSerializer
@@ -96,7 +104,6 @@ class CreateComment(CreateAPIView):
         post_id = request.data.get("post_id",None)
         content = request.data.get("content",None)
 
-        #if not post_id == None and content == None:
         res = self.get_post(post_id)
         
         response = res.get("response")
@@ -142,6 +149,7 @@ class CreateComment(CreateAPIView):
         else:
             return Response({"error":"Post not found"},status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.data,status=status.HTTP_404_NOT_FOUND)
+
 class GetComment(RetrieveAPIView):
     queryset = Comment.objects.all().order_by("-id")
     # renderer_classes = [TemplateHTMLRenderer]
