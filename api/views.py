@@ -6,7 +6,7 @@ import json
 from rest_framework import authentication,permissions,status,reverse
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView,RetrieveAPIView,CreateAPIView,ListAPIView,UpdateAPIView
+from rest_framework.generics import GenericAPIView,RetrieveAPIView,RetrieveUpdateDestroyAPIView,CreateAPIView,ListAPIView,UpdateAPIView
 from rest_framework.response import Response
 from rest_framework import parsers
 from django.core.serializers import serialize
@@ -59,6 +59,7 @@ class GetPost(ListAPIView):
 
 class GetPostById(GenericAPIView):
     queryset = Post.objects.all()
+    http_method_names = ['get','patch','delete']
 
     def get(self,request,*args,**kwargs):
         post = self.get_object()
@@ -79,7 +80,7 @@ class GetPostById(GenericAPIView):
         post = self.get_object()
         if request.user == post.owner:
             post.delete()
-            return Response("Your post is successfully deleted.")
+            return Response("Your post is successfully deleted.",status=status.HTTP_204_NO_CONTENT)
         return Response({"error":"Access denied."},status=status.HTTP_403_FORBIDDEN)
 
 class CreatePostView(APIView):
@@ -211,14 +212,40 @@ class GetArticle(ListAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
 
-class GetArticleById(RetrieveAPIView):   
+class GetArticleById(RetrieveUpdateDestroyAPIView):   
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
+    http_method_names = ['get','patch','delete']
 
     def retrieve(self,request,*args,**kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        if instance.author == request.user:
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+
+            if getattr(instance, '_prefetched_objects_cache', None):
+                # If 'prefetch_related' has been applied to a queryset, we need to
+                # forcibly invalidate the prefetch cache on the instance.
+                instance._prefetched_objects_cache = {}
+
+            return Response(serializer.data)
+        return Response({"error":"Access denied"},status=status.HTTP_403_FORBIDDEN)
+
+    def destroy(self,request,*args,**kwargs):
+        instance = self.get_object()
+
+        if request.user == instance.author:
+            self.perform_destroy(instance)
+            return Response("Your article successfully deleted.",status=status.HTTP_204_NO_CONTENT)
+        return Response({"error":"Access denied"},status=status.HTTP_403_FORBIDDEN)
+    
 
 class CreateArticleComment(CreateAPIView):
     queryset = Comment.objects.all()
