@@ -56,7 +56,7 @@ class GetPost(ListAPIView):
         self.check_permissions(request)
         self.check_throttles(request)
 
-class CreatePostView(APIView):
+class CreateAndUpdatePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [parsers.MultiPartParser,parsers.JSONParser]    
 

@@ -152,6 +152,7 @@ class CreateAndUpdatePostSerializer(serializers.ModelSerializer):
     def update(self,instance,validated_data):
         instance.text = validated_data.get("text")
         instance.photo = validated_data.get("photo")
+        return instance
 
     def __init__(self,owner,*args,**kwargs):
         super(PostSerializer,self).__init__(*args,**kwargs)
