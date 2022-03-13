@@ -561,7 +561,7 @@ class FollowView(LoginRequiredMixin,View):
     def get(self, request, user_id,*args, **kwargs):
         path = request.META.get('HTTP_REFERER')
         user = User.objects.get(pk=user_id)
-        print("[PATH]",dir(request),dir(request.session),request.session,request.COOKIES)
+        #print("[PATH]",dir(request),dir(request.session),request.session,request.COOKIES)
         try:
             follower = Follower.objects.get(user=user)
             followers = follower.follower.all()

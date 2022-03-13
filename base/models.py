@@ -85,9 +85,9 @@ class Follower(models.Model):
         obj,created = cls.objects.get_or_create(user=user)
         if not created:
             obj.follower.add(follower)
-        else:
-            obj.save()
+        if created:
             obj.follower.add(follower)
+            obj.save()
         return obj
 
     @classmethod
