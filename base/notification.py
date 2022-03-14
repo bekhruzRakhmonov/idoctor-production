@@ -3,9 +3,10 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save,pre_save
 
 @receiver(post_save,sender=Follower)
-async def handle_follower(sender,**kwargs):
+def handle_follower(sender,**kwargs):
     instance = kwargs["instance"]
-    obj,created = await Notification.objects.get_or_create(from_user=instance.follower.last(),to_user=instance.user,notf_follower=instance,notf_type="following")
+    follower = instance.follower.last()
+    obj,created = Notification.objects.get_or_create(from_user=follower,to_user=instance.user,notf_follower=instance,notf_type="following")
 
 @receiver(post_save,sender=Post)
 def handle_post(sender,**kwargs):
