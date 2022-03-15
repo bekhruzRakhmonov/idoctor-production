@@ -563,21 +563,15 @@ h2 {
             let msgContainer = document.querySelector(".msg_card_body")
             let status = document.querySelector("#status")
 
-            let rws = new ReconnectingWebSocket(`wss://${window.location.host}/ws/chat/${roomName}/`)
-            rws.addEventListener("open",(e)=>{
-                console.log("Connection established.")
-            })
+            
 
-            rws.addEventListener("message",(e)=>{
-                console.log("Message recevied: ",e)
-            })
-
-            let chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/${roomName}/`);
+            let chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
             console.log(chatSocket)
 
             let currentStatus = false
             chatSocket.onopen = (e) => {
                 console.log(e)
+                console.log("Connection established.")
                 currentStatus = true
                 chatSocket.send(JSON.stringify({
                     message: {

@@ -59,13 +59,13 @@
                             <a href="">PHP, .Net</a><br/>
                         </div>
                     </div>
-                    <div class="col-md-8" style="margin-top: -150px;">
+                    <div class="col-md-8" style="margin-top: -50px;">
                         <div class="tab-content profile-tab" id="myTabContent">
                             <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="home-tab">
                                     <div class="row">
                                         {% if posts|length > 0 %}
                                             {% for post in posts %}
-    	                                        <div class="card" style="">
+    	                                        <div class="card" style="margin-top: -100px;">
     	                                            {% if post.text %}
                                                         <p>{{post.text}}</p>
                                                     {% endif %}
@@ -82,16 +82,20 @@
                                             
                             </div>
                             <div class="tab-pane fade" id="articles" role="tabpanel" aria-labelledby="profile-tab">
-                                {% for article in articles %}
-                                    <div class="row">
-                                        <div class="col-md-6" style="width: 300px;">
-                                            <label style="width: 300px;"><a href="{% url 'article-detail' article.id %}" style="color:black;width: 300px;word-wrap: break-word;">{{article.headline}}</a></label>
+                                {% if articles|length > 0 %}
+                                    {% for article in articles %}
+                                        <div class="row">
+                                            <div class="col-md-6" style="width: 300px;">
+                                                <label style="width: 300px;"><a href="{% url 'article-detail' article.id %}" style="color:black;width: 300px;word-wrap: break-word;">{{article.headline}}</a></label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p>{{article.date}}</p>
+                                            </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <p>{{article.date}}</p>
-                                        </div>
-                                    </div>
-                                {% endfor %}
+                                    {% endfor %}
+                                {% else %}
+                                    <h1>No articles yet</h1>
+                                {% endif %}
                                 </div>
                             </div>
                         </div>

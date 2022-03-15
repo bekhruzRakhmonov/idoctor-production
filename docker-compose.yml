@@ -29,18 +29,3 @@ services:
     depends_on:
       - db
       - redis
-  migration:
-    image: idoctor_web
-    command: python manage.py migrate --noinput
-    volumes: 
-      - .:/code
-    depends_on:
-      - db
-      - redis
-  superuser:
-    image: idoctor_web
-    command: python manage.py createsuperuser
-    volumes:
-      - .:/code
-    depends_on:
-      - web
