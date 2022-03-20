@@ -4,7 +4,6 @@ from ckeditor.fields import RichTextField
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser,AbstractBaseUser,PermissionsMixin
 from django.contrib.auth.models import UserManager,BaseUserManager
-from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.hashers import make_password
 from . import validators
 from django.urls import reverse, reverse_lazy
@@ -64,9 +63,48 @@ class User(AbstractBaseUser,PermissionsMixin):
     def get_status(self,user):
         return self.objects.get(user=user).status
 
+class AnonymousUser(models.Model):
+    username = models.CharField(max_length=2048,null=True,blank=True)
+    ip = models.GenericIPAddressField()
+    date_joined = models.DateTimeField(auto_now_add=True)
+
+    @classmethod
+    def create_user(cls,ip,username=None):
+        if username is not None:
+            obj,created = cls.objects.get_or_create(ip=ip,username=username)
+            if created:
+                obj.save()
+            return obj
+        obj,created = cls.objects.get_or_create(ip=ip)
+        if created:
+            obj.username = f"user{obj.id}"
+            obj.save()
+        return obj
+
+    @property
+    def is_authenticated(self):
+        # This always returns True
+        return False
+
+    @property
+    def is_anonymous(self):
+        return True
+
+    @property
+    def is_anon(self):
+        return True
+    
+    @property
+    def is_active(self):
+        return True
+
+    def __str__(self):
+        return self.username
+
 class Follower(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="following_user")
-    follower = models.ManyToManyField(User,related_name="follower")
+    followers = models.ManyToManyField(User,related_name="followers")
+    anon_followers = models.ManyToManyField(AnonymousUser,related_name="anon_followers")
 
     def __str__(self):
         return f"{self.follower} is followed to {self.user}"
@@ -75,7 +113,7 @@ class Follower(models.Model):
     def get_count(cls,user):
         try:
             followers = cls.objects.get(user=user)
-            followers_count = followers.follower.all().count()
+            followers_count = followers.followers.all().count()
             return followers_count
         except Follower.DoesNotExist:
             return 0
@@ -84,20 +122,22 @@ class Follower(models.Model):
     def follow(cls,user,follower):
         obj,created = cls.objects.get_or_create(user=user)
         if not created:
-            obj.follower.add(follower)
-        if created:
-            obj.follower.add(follower)
+            obj.followers.add(follower)
+            obj.save()
+        else:
+            obj.followers.add(follower)
             obj.save()
         return obj
 
     @classmethod
     def unfollow(cls,user,follower):
         obj = cls.objects.get(user=user)
-        obj.follower.remove(follower)
+        obj.followers.remove(follower)
         return obj
 
 class ChatMessage(models.Model):
-    outgoing = models.ForeignKey(User, on_delete=models.CASCADE,related_name="outgoing",null=True)
+    outgoing = models.ForeignKey(User, on_delete=models.CASCADE,related_name="outgoing",null=True,blank=True)
+    outgoing_anon_user = models.ForeignKey(AnonymousUser, on_delete=models.CASCADE,related_name="outgoing_anon_user",null=True,blank=True)
     incoming = models.ForeignKey(User, on_delete=models.CASCADE,related_name="incoming",null=True)
     message = models.TextField(null=True)
     date = models.DateTimeField(auto_now_add=True,null=True)
@@ -105,7 +145,10 @@ class ChatMessage(models.Model):
     
     @classmethod
     def create(cls,message,outgoing,incoming):
-        return cls(outgoing=outgoing,incoming=incoming,message=message)
+        if outgoing.is_authenticated:
+            return cls(outgoing=outgoing,incoming=incoming,message=message)
+        elif outgoing.is_anonymous:
+            return cls(outgoing_anon_user=outgoing,incoming=incoming,message=message)
 
     def __str__(self):
         return self.message
@@ -113,10 +156,6 @@ class ChatMessage(models.Model):
     @property
     def check_seen(self):
         return self.is_seen
-
-class FilterManager(models.Manager):
-    def filter(self):
-        return self.annotate()
     
 class ChatRoom(models.Model):
     room_id =  models.CharField(max_length=255)
@@ -158,7 +197,8 @@ class Post(models.Model):
         return cls.objects.filter(owner=user).count()
 
 class Comment(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="comment_user")
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="comment_user",blank=True)
+    anon_user = models.ForeignKey(AnonymousUser,on_delete=models.CASCADE,related_name="comment_anon_user",blank=True,null=True)
     post = models.ForeignKey(Post,on_delete=models.CASCADE,related_name="post_comment",null=True)
     comment = models.ManyToManyField("ChildComment",related_name="child_comment")
  
@@ -192,7 +232,7 @@ class ChildCommentArticle(models.Model):
 
 class Like(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="like_post_user",null=True,blank=True)
-    anonymous_user = models.GenericIPAddressField(null=True,blank=True)
+    anon_user = models.ForeignKey(AnonymousUser,on_delete=models.CASCADE,related_name="like_post_anonymous_user",null=True,blank=True)
     date = models.DateTimeField(auto_now_add=True)
     like = models.BooleanField(default=False)
     
@@ -244,6 +284,7 @@ class Notification(models.Model):
     )
     from_user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="notf_from_user",null=True,blank=True)
     to_user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="notf_to_user",null=True,blank=True)
+    to_anon_user = models.ForeignKey(AnonymousUser,on_delete=models.CASCADE,related_name="notf_to_anon_user",null=True,blank=True)
     notf_comment = models.ForeignKey(Comment,on_delete=models.CASCADE,related_name="notf_comments",null=True)
     notf_comment_article = models.ForeignKey(CommentArticle,on_delete=models.CASCADE,related_name="notf_comments_article",null=True)
     notf_like = models.ForeignKey(Like,on_delete=models.CASCADE,related_name="notf_likes",null=True)

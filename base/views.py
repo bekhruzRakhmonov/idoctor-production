@@ -22,7 +22,8 @@ from .exceptions import FollowerError
 from django.utils.text import slugify
 from django.contrib import messages
 from django.views.decorators.clickjacking import xframe_options_exempt
-from .models import User, Post, Article, Like, Comment, ChildComment, CommentArticle, ChildCommentArticle, ChatMessage, ChatRoom, Follower, Notification
+from .cookies import set_cookie,b64_decode
+from .models import User, AnonymousUser, Post, Article, Like, Comment, ChildComment, CommentArticle, ChildCommentArticle, ChatMessage, ChatRoom, Follower, Notification
 from .forms import UserCreationForm, UserLoginForm, UserPasswordChangeForm, UserSetPasswordForm, ChangeUserForm,CreatePostForm, PostCommentForm, CreateArticleForm
 import json
 import threading
@@ -30,8 +31,6 @@ import base64
 from . import notification
 import mimetypes
 # https://support.lenovo.com/uz/en/solutions/ht505250-how-to-reduce-or-expand-system-partition-c-drive-size-in-windows
-
-# https://gitpodio-templatepythond-9o72sfbanvp.ws-eu34.gitpod.io/
 
 to_be_decoded = "VGhpcyBpcyBHZWVrc0ZvckdlZWtzIDQ1NDU0NSAjICQlNjc4KiZeQCE="
 decoded = base64.b64decode(bytes(to_be_decoded, 'utf-8'))
@@ -43,6 +42,15 @@ print(threading.get_ident())
 print(threading.get_native_id())
 
 class Main(View):
+    def get_client_ip(self):
+        x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
+
+        if x_forwarded_for:
+            ip = x_forwarded_for
+        else:
+            ip = self.request.META.get('REMOTE_ADDR')
+        return ip
+
     def get(self,request, *arg, **kwargs):
         users = User.objects.all()
         posts = Post.objects.all().order_by("-pub_date")
@@ -63,8 +71,16 @@ class Main(View):
             context["notifications"] = notifications
             context["comment_form"] = comment_form
             context["create_post_form"] = post_form
-            return render(request, "base.html", context)
-        return render(request, "base.html", context)
+
+        response = render(request, "base.html", context)
+        ip = self.get_client_ip()
+        anonymous_user = AnonymousUser.create_user(ip=ip)
+        print(anonymous_user)
+        obj = AnonymousUser.objects.filter(id__exact=anonymous_user.id).values()
+        print("Object: ",obj[0])
+        value = str(obj[0])
+        set_cookie(response,key="data",value=value,days_expire=90)
+        return response
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
@@ -160,31 +176,61 @@ class PostCommentView(View):
     def post(self,request,post_id,*args,**kwargs):
         comment_content = request.POST["comment-text"]
         post = Post.objects.get(post_id=post_id)
-        comment = Comment.objects.filter(user__exact=request.user,post__exact=post)
 
-        # check user has a commment for this post
-        if len(comment) > 0:
-            comment = Comment.objects.last()
-            comment_created = False
-        elif len(comment) == 0:
-            comment = Comment.objects.create(user=request.user,post=post)
-            comment_created = True
-        child_comment = ChildComment.objects.create(content=comment_content)
-        
-        # checking comment is not created 
-        if not comment_created:
-            data = comment.comment.latest("date")
-            data_dict = {}
-            for d in data.child_comment.all():
-                data_dict = dict((("user_id",d.user.id),("post_id",d.post_id)))
-            if data_dict["user_id"] == request.user.id and str(data_dict["post_id"]) == post_id:
-                comment.comment.add(child_comment)
-            else:
+        if request.user.is_authenticated:
+            comment = Comment.objects.filter(user__exact=request.user,post__exact=post)
+
+            # check user has a commment for this post
+            if len(comment) > 0:
+                comment = Comment.objects.last()
+                comment_created = False
+            elif len(comment) == 0:
                 comment = Comment.objects.create(user=request.user,post=post)
+                comment_created = True
+            child_comment = ChildComment.objects.create(content=comment_content)
+            
+            # checking comment is not created 
+            if not comment_created:
+                data = comment.comment.latest("date")
+                data_dict = {}
+                for d in data.child_comment.all():
+                    data_dict = dict((("user_id",d.user.id),("post_id",d.post_id)))
+                if data_dict["user_id"] == request.user.id and str(data_dict["post_id"]) == post_id:
+                    comment.comment.add(child_comment)
+                else:
+                    comment = Comment.objects.create(user=request.user,post=post)
+                    comment.comment.add(child_comment)
+                    comment.save()
+            elif comment_created:
                 comment.comment.add(child_comment)
-                comment.save()
-        elif comment_created:
-            comment.comment.add(child_comment)
+
+        elif request.user.is_anon:
+            comment = Comment.objects.filter(anon_user__exact=request.user,post__exact=post)
+
+            # check user has a commment for this post
+            if len(comment) > 0:
+                comment = Comment.objects.last()
+                comment_created = False
+            elif len(comment) == 0:
+                comment = Comment.objects.create(anon_user=request.user,post=post)
+                comment_created = True
+            child_comment = ChildComment.objects.create(content=comment_content)
+            
+            # checking comment is not created 
+            if not comment_created:
+                data = comment.comment.latest("date")
+                data_dict = {}
+                for d in data.child_comment.all():
+                    data_dict = dict((("user_id",d.user.id),("post_id",d.post_id)))
+                if data_dict["user_id"] == request.user.id and str(data_dict["post_id"]) == post_id:
+                    comment.comment.add(child_comment)
+                else:
+                    comment = Comment.objects.create(anon_user=request.user,post=post)
+                    comment.comment.add(child_comment)
+                    comment.save()
+            elif comment_created:
+                comment.comment.add(child_comment)
+
         return redirect(reverse_lazy("base:main"))
 
 class PostCommentArticleView(View):
@@ -193,27 +239,52 @@ class PostCommentArticleView(View):
         path = request.META["HTTP_REFERER"]
         comment_content = request.POST["comment-text"]
         article = Article.objects.get(pk=pk)
-        comment = CommentArticle.objects.filter(user__exact=request.user,article__exact=article)
-        if len(comment) > 0:
-            comment = CommentArticle.objects.last()
-            comment_created = False
-        elif len(comment) == 0:
-            comment = CommentArticle.objects.create(user=request.user,article=article)
-            comment_created = True
-        child_comment = ChildCommentArticle.objects.create(content=comment_content)
-        if not comment_created:
-            data = comment.comment.latest("date")
-            data_dict = {}
-            for d in data.child_comment_article.all():
-                data_dict = dict((("user_id",d.user.id),("article_id",d.article_id)))
-            if data_dict["user_id"] == request.user.id and int(data_dict["article_id"]) == pk:
-                comment.comment.add(child_comment)
-            else:
+
+        if request.user.is_authenticated:
+            comment = CommentArticle.objects.filter(user__exact=request.user,article__exact=article)
+            if len(comment) > 0:
+                comment = CommentArticle.objects.last()
+                comment_created = False
+            elif len(comment) == 0:
                 comment = CommentArticle.objects.create(user=request.user,article=article)
+                comment_created = True
+            child_comment = ChildCommentArticle.objects.create(content=comment_content)
+            if not comment_created:
+                data = comment.comment.latest("date")
+                data_dict = {}
+                for d in data.child_comment_article.all():
+                    data_dict = dict((("user_id",d.user.id),("article_id",d.article_id)))
+                if data_dict["user_id"] == request.user.id and int(data_dict["article_id"]) == pk:
+                    comment.comment.add(child_comment)
+                else:
+                    comment = CommentArticle.objects.create(user=request.user,article=article)
+                    comment.comment.add(child_comment)
+                    comment.save()
+            elif comment_created:
                 comment.comment.add(child_comment)
-                comment.save()
-        elif comment_created:
-            comment.comment.add(child_comment)
+
+        elif request.user.is_anon:
+            comment = CommentArticle.objects.filter(anon_user__exact=request.user,article__exact=article)
+            if len(comment) > 0:
+                comment = CommentArticle.objects.last()
+                comment_created = False
+            elif len(comment) == 0:
+                comment = CommentArticle.objects.create(anon_user=request.user,article=article)
+                comment_created = True
+            child_comment = ChildCommentArticle.objects.create(content=comment_content)
+            if not comment_created:
+                data = comment.comment.latest("date")
+                data_dict = {}
+                for d in data.child_comment_article.all():
+                    data_dict = dict((("user_id",d.user.id),("article_id",d.article_id)))
+                if data_dict["user_id"] == request.user.id and int(data_dict["article_id"]) == pk:
+                    comment.comment.add(child_comment)
+                else:
+                    comment = CommentArticle.objects.create(anon_user=request.user,article=article)
+                    comment.comment.add(child_comment)
+                    comment.save()
+            elif comment_created:
+                comment.comment.add(child_comment)
         return redirect(path)    
 
 # Article section
@@ -333,7 +404,9 @@ class LikeArticleView(View):
                     article.likes.remove(like)
                     like.delete()
                 else:
-                    like = article.likes.get(anonymous_user=ip,like=True)
+                    anonymous_user = AnonymousUser.objects.get_or_create(ip=ip)
+
+                    like = article.likes.get(anonymous_user=anonymous_user,like=True)
                     article.likes.remove(like)
                     like.delete()
             except Like.DoesNotExist:
@@ -369,6 +442,12 @@ class LikePostView(View):
                     like = post.likes.get(user=request.user,like=True)
                     post.likes.remove(like)
                     like.delete()
+
+                # Check the user is anonymous and have registered by custom AnonymousUser model
+                elif request.user.is_anon:
+                    like = post.likes.get(anon_user=request.user,like=True)
+                    post.likes.remove(like)
+                    like.delete()
                 else:
                     like = post.likes.get(anonymous_user=ip,like=True)
                     post.likes.remove(like)
@@ -376,6 +455,11 @@ class LikePostView(View):
             except Like.DoesNotExist:
                 if request.user.is_authenticated:
                     like = Like.objects.create(user=request.user,like=True)
+                    post.likes.add(like)
+
+                # Check the user is anonymous and have registered by custom AnonymousUser model
+                elif request.user.is_anon:
+                    like = Like.objects.create(anon_user=request.user,like=True)
                     post.likes.add(like)
                 else:
                     like = Like.objects.create(anonymous_user=ip,like=True)
@@ -455,11 +539,12 @@ class UserProfileShowcaseView(View):
         user = User.objects.get(pk=user_id)
         posts = Post.objects.filter(owner=user).values().order_by("-pub_date")
         articles = Article.objects.filter(author=user)
-        followed = True
-        try:
-            follower = Follower.objects.get(user=user,follower=request.user)
-        except Follower.DoesNotExist:
-            followed = False
+        followed = False
+        if request.user.is_authenticated:
+            try:
+                follower = Follower.objects.get(user=user,follower=request.user)
+            except Follower.DoesNotExist:
+                followed = True
         context = {
             "user": user,
             "posts": posts,
@@ -553,7 +638,6 @@ class Login(View):
 
 
 class FollowView(LoginRequiredMixin,View):
-
     def get_redirect_field_name(self):
         path = self.request.path
         return path
@@ -561,20 +645,38 @@ class FollowView(LoginRequiredMixin,View):
     def get(self, request, user_id,*args, **kwargs):
         path = request.META.get('HTTP_REFERER')
         user = User.objects.get(pk=user_id)
-        #print("[PATH]",dir(request),dir(request.session),request.session,request.COOKIES)
         try:
-            follower = Follower.objects.get(user=user)
-            followers = follower.follower.all()
-            if request.user in followers:
-                Follower.unfollow(user=user, follower=request.user)
-            else:
-                raise FollowerError("UserDoesNotExist")
+            if request.user.is_authenticated:
+                follower = Follower.objects.get(user=user)
+                followers = follower.follower.all()
+                if request.user in followers:
+                    Follower.unfollow(user=user, follower=request.user)
+                else:
+                    raise FollowerError("UserDoesNotExist")
+            if request.user.is_anon:
+                follower = Follower.objects.get(anon_user=user)
+                followers = follower.follower.all()
+                if request.user in followers:
+                    Follower.unfollow(user=user, follower=request.user)
+                else:
+                    raise FollowerError("UserDoesNotExist")
         except (FollowerError,Follower.DoesNotExist):
-            if not user == request.user:
+            if request.user.is_authenticated:
+                if not user == request.user:
+                    Follower.follow(user=user, follower=request.user)
+            if request.user.is_anon:
                 Follower.follow(user=user, follower=request.user)
         return redirect(path)
 
+# To make appointment with doctor.
+class MakeAppointmentView(View):
+    def get(self,request,*args,**kwargs):
+        pass
 
+    def post(self,request,*args,**kwargs):
+        pass
+
+# Realted to Authentiction
 def logout_view(request):
     logout(request)
     return HttpResponse("<h3>You succesfully logged out.</h3> Login <a href='/'>Home</a>")

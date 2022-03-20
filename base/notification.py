@@ -1,12 +1,13 @@
 from .models import User,Follower,Post,Article,Comment,CommentArticle,Like,Notification
 from django.dispatch import receiver
-from django.db.models.signals import post_save,pre_save
+from django.db.models.signals import post_save, pre_save, m2m_changed
 
-@receiver(post_save,sender=Follower)
-def handle_follower(sender,**kwargs):
-    instance = kwargs["instance"]
-    follower = instance.follower.last()
-    obj,created = Notification.objects.get_or_create(from_user=follower,to_user=instance.user,notf_follower=instance,notf_type="following")
+def followers_changed(sender,instance,action,**kwargs):
+    if action == 'post_add':
+        follower = instance.follower.last()
+        obj,created = Notification.objects.get_or_create(from_user=follower,to_user=instance.user,notf_follower=instance,notf_type="following")
+
+m2m_changed.connect(followers_changed,sender=Follower.followers.through)
 
 @receiver(post_save,sender=Post)
 def handle_post(sender,**kwargs):

@@ -223,7 +223,7 @@ class GetArticleById(RetrieveUpdateDestroyAPIView):
         return Response(serializer.data)
     
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop('partial', False) # it returns boolean "True" if partial has
         instance = self.get_object()
         if instance.author == request.user:
             serializer = self.get_serializer(instance, data=request.data, partial=partial)
@@ -321,6 +321,15 @@ class ArticleComments(ListAPIView):
 class LikePost(CreateAPIView):
     serializer_class = LikePostSerializer
     
+    def get_client_ip(self):
+        x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
+
+        if x_forwarded_for:
+            ip = x_forwarded_for
+        else:
+            ip = self.request.META.get('REMOTE_ADDR')
+        return ip
+
     def get_post(self,post_id):
         try:
             post = Post.objects.get(post_id=post_id)
@@ -332,16 +341,25 @@ class LikePost(CreateAPIView):
         post_id = request.data.get("post_id",None)
         res = self.get_post(post_id)
         response = res.get("response")
+        ip = self.get_client_ip()
         if not response.status_code == 404:
             post = res.get("post")
             try:
-                like = post.likes.get(user=request.user,like=True)
-                post.likes.remove(like)
-                like.delete()
+                if request.user.is_authenticated:
+                    like = post.likes.get(user=request.user,like=True)
+                    post.likes.remove(like)
+                    like.delete()
+                else:
+                    like = post.likes.get(anonymous_user=ip,like=True)
+                    post.likes.remove(like)
+                    like.delete()
             except Like.DoesNotExist:
-                like = Like.objects.create(user=request.user,like=True)
-                post.likes.add(like)
-            print(post)
+                if request.user.is_authenticated:
+                    like = Like.objects.create(user=request.user,like=True)
+                    post.likes.add(like)
+                else:
+                    like = Like.objects.create(anonymous_user=ip,like=True)
+                    post.likes.add(like)
             data = {
                     "post": {"text":post.text,"photo":post.photo.url},
                     "likes": post.likes.all().count()
@@ -353,6 +371,15 @@ class LikePost(CreateAPIView):
 class LikeArticle(CreateAPIView):
     serializer_class = LikeArticleSerializer
     
+    def get_client_ip(self):
+        x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
+
+        if x_forwarded_for:
+            ip = x_forwarded_for
+        else:
+            ip = self.request.META.get('REMOTE_ADDR')
+        return ip
+
     def get_article(self,article_id):
         try:
             article = Article.objects.get(pk=article_id)
@@ -364,15 +391,25 @@ class LikeArticle(CreateAPIView):
         article_id = request.data.get("article_id",None)
         res = self.get_article(article_id)
         response = res.get("response")
+        ip = self.get_client_ip()
         if not response.status_code == 404:
             article = res.get("article")
             try:
-                like = article.likes.get(user=request.user,like=True)
-                article.likes.remove(like)
-                like.delete()
+                if request.user.is_authenticated:
+                    like = article.likes.get(user=request.user,like=True)
+                    article.likes.remove(like)
+                    like.delete()
+                else:
+                    like = article.likes.get(anonymous_user=ip,like=True)
+                    article.likes.remove(like)
+                    like.delete()
             except Like.DoesNotExist:
-                like = Like.objects.create(user=request.user,like=True)
-                article.likes.add(like)
+                if request.user.is_authenticated:
+                    like = Like.objects.create(user=request.user,like=True)
+                    article.likes.add(like)
+                else:
+                    like = Like.objects.create(anonymous_user=ip,like=True)
+                    article.likes.add(like)
             data = {
                     "article": {"headline":article.headline,"body": article.body},
                     "likes": article.likes.all().count()
@@ -392,6 +429,7 @@ class ListUsers(ListAPIView):
         return queryset
 
 class UserPasswordChangeView(UpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     queryset = User.objects.all()
     serializer_class = UserPasswordChangeSerializer
 
