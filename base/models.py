@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser,AbstractBaseUser,PermissionsMixin
 from django.contrib.auth.models import UserManager,BaseUserManager
 from django.contrib.auth.hashers import make_password
+from django.core.validators import FileExtensionValidator
 from . import validators
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -63,7 +64,11 @@ class User(AbstractBaseUser,PermissionsMixin):
     def get_status(self,user):
         return self.objects.get(user=user).status
 
-class AnonymousUser(models.Model):
+    @property
+    def is_anon(self):
+        return False
+
+class AnonUser(models.Model):
     username = models.CharField(max_length=2048,null=True,blank=True)
     ip = models.GenericIPAddressField()
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -104,10 +109,10 @@ class AnonymousUser(models.Model):
 class Follower(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="following_user")
     followers = models.ManyToManyField(User,related_name="followers")
-    anon_followers = models.ManyToManyField(AnonymousUser,related_name="anon_followers")
+    anon_followers = models.ManyToManyField(AnonUser,related_name="anon_followers")
 
     def __str__(self):
-        return f"{self.follower} is followed to {self.user}"
+        return f"{self.followers} is followed to {self.user}"
 
     @classmethod
     def get_count(cls,user):
@@ -119,7 +124,7 @@ class Follower(models.Model):
             return 0
 
     @classmethod
-    def follow(cls,user,follower):
+    def follow(cls,user: User,follower: User) -> None:
         obj,created = cls.objects.get_or_create(user=user)
         if not created:
             obj.followers.add(follower)
@@ -130,21 +135,21 @@ class Follower(models.Model):
         return obj
 
     @classmethod
-    def unfollow(cls,user,follower):
+    def unfollow(cls,user: User,follower: User) -> None:
         obj = cls.objects.get(user=user)
         obj.followers.remove(follower)
         return obj
 
 class ChatMessage(models.Model):
     outgoing = models.ForeignKey(User, on_delete=models.CASCADE,related_name="outgoing",null=True,blank=True)
-    outgoing_anon_user = models.ForeignKey(AnonymousUser, on_delete=models.CASCADE,related_name="outgoing_anon_user",null=True,blank=True)
+    outgoing_anon_user = models.ForeignKey(AnonUser, on_delete=models.CASCADE,related_name="outgoing_anon_user",null=True,blank=True)
     incoming = models.ForeignKey(User, on_delete=models.CASCADE,related_name="incoming",null=True)
     message = models.TextField(null=True)
     date = models.DateTimeField(auto_now_add=True,null=True)
     is_seen = models.BooleanField(default=False)
     
     @classmethod
-    def create(cls,message,outgoing,incoming):
+    def create(cls,message,outgoing: User,incoming: User) -> None:
         if outgoing.is_authenticated:
             return cls(outgoing=outgoing,incoming=incoming,message=message)
         elif outgoing.is_anonymous:
@@ -182,7 +187,8 @@ class Post(models.Model):
     post_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner = models.ForeignKey(User,on_delete=models.CASCADE,related_name="post_user")
     text = models.TextField(blank=True)
-    photo = models.ImageField(upload_to='posts/images',blank=True,null=True)
+    photo = models.ImageField(upload_to='posts/images/',blank=True,null=True)
+    video = models.FileField(upload_to='posts/videos/',validators=[FileExtensionValidator(allowed_extensions=['MOV','avi','mp4','webm','mkv'])],blank=True,null=True)
     pub_date = models.DateTimeField(auto_now_add=True,null=True)
     likes = models.ManyToManyField("Like",related_name="post_likes")
 
@@ -198,7 +204,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="comment_user",blank=True)
-    anon_user = models.ForeignKey(AnonymousUser,on_delete=models.CASCADE,related_name="comment_anon_user",blank=True,null=True)
+    anon_user = models.ForeignKey(AnonUser,on_delete=models.CASCADE,related_name="comment_anon_user",blank=True,null=True)
     post = models.ForeignKey(Post,on_delete=models.CASCADE,related_name="post_comment",null=True)
     comment = models.ManyToManyField("ChildComment",related_name="child_comment")
  
@@ -232,14 +238,14 @@ class ChildCommentArticle(models.Model):
 
 class Like(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="like_post_user",null=True,blank=True)
-    anon_user = models.ForeignKey(AnonymousUser,on_delete=models.CASCADE,related_name="like_post_anonymous_user",null=True,blank=True)
+    anon_user = models.ForeignKey(AnonUser,on_delete=models.CASCADE,related_name="like_post_anonymous_user",null=True,blank=True)
     date = models.DateTimeField(auto_now_add=True)
     like = models.BooleanField(default=False)
     
     def __str__(self):
         if self.user:
             return str(self.user.pk)
-        return str(self.anonymous_user)
+        return str(self.anon_user)
     
 class Article(models.Model):
     comments = models.ForeignKey("self",on_delete=models.CASCADE,related_name="own_article",null=True,blank=True)
@@ -284,7 +290,7 @@ class Notification(models.Model):
     )
     from_user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="notf_from_user",null=True,blank=True)
     to_user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="notf_to_user",null=True,blank=True)
-    to_anon_user = models.ForeignKey(AnonymousUser,on_delete=models.CASCADE,related_name="notf_to_anon_user",null=True,blank=True)
+    to_anon_user = models.ForeignKey(AnonUser,on_delete=models.CASCADE,related_name="notf_to_anon_user",null=True,blank=True)
     notf_comment = models.ForeignKey(Comment,on_delete=models.CASCADE,related_name="notf_comments",null=True)
     notf_comment_article = models.ForeignKey(CommentArticle,on_delete=models.CASCADE,related_name="notf_comments_article",null=True)
     notf_like = models.ForeignKey(Like,on_delete=models.CASCADE,related_name="notf_likes",null=True)
@@ -304,3 +310,22 @@ class Notification(models.Model):
     def get_count(cls,to_user):
         count = cls.objects.filter(to_user=to_user).count()
         return count
+
+class Appointment(models.Model):
+    doctor = models.ForeignKey(User,on_delete=models.CASCADE,related_name="appointment_user")
+    clients = models.ManyToManyField(AnonUser,related_name="appointment_clients")
+    doctors = models.ManyToManyField(User,related_name="appointment_doctors")
+    reason = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+
+class SavedMessages(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="saved_messages_user",blank=True,null=True)
+    anon_user = models.ForeignKey(AnonUser, on_delete=models.CASCADE,related_name="saved_messagess_anon_user",blank=True,null=True)
+    posts = models.ManyToManyField(Post,related_name="saved_message_post")
+    articles = models.ManyToManyField(Post,related_name="saved_messages_article")
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        if self.posts is not None:
+            return self.posts.last().text
+        return self.articles.last().headline

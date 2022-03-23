@@ -4,7 +4,7 @@ from django.db.models.signals import post_save, pre_save, m2m_changed
 
 def followers_changed(sender,instance,action,**kwargs):
     if action == 'post_add':
-        follower = instance.follower.last()
+        follower = instance.followers.last()
         obj,created = Notification.objects.get_or_create(from_user=follower,to_user=instance.user,notf_follower=instance,notf_type="following")
 
 m2m_changed.connect(followers_changed,sender=Follower.followers.through)

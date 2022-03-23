@@ -23,6 +23,7 @@ django-js-asset==2.0.0
 django-libsass==0.9
 djangorestframework==3.13.1
 djangorestframework-simplejwt==5.1.0
+fontawesomefree==6.1.0
 hyperlink==21.0.0
 idna==3.3
 incremental==21.3.0

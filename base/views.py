@@ -23,10 +23,11 @@ from django.utils.text import slugify
 from django.contrib import messages
 from django.views.decorators.clickjacking import xframe_options_exempt
 from .cookies import set_cookie,b64_decode
-from .models import User, AnonymousUser, Post, Article, Like, Comment, ChildComment, CommentArticle, ChildCommentArticle, ChatMessage, ChatRoom, Follower, Notification
-from .forms import UserCreationForm, UserLoginForm, UserPasswordChangeForm, UserSetPasswordForm, ChangeUserForm,CreatePostForm, PostCommentForm, CreateArticleForm
+from .models import User, AnonUser, Post, Article, Like, Comment, ChildComment, CommentArticle, ChildCommentArticle, ChatMessage, ChatRoom, Follower, Notification, Appointment, SavedMessages
+from .forms import UserCreationForm, UserLoginForm, UserPasswordChangeForm, UserSetPasswordForm, ChangeUserForm,CreatePostForm, PostCommentForm, CreateArticleForm, AppointmentForm
 import json
 import threading
+import logging
 import base64
 from . import notification
 import mimetypes
@@ -41,16 +42,18 @@ print("[CURRENT THREAD]",threading.current_thread())
 print(threading.get_ident())
 print(threading.get_native_id())
 
+def get_cookie(request,response,ip):
+    anon_user_data = request.COOKIES.get("data",None)
+    anonymous_user = AnonUser.create_user(ip=ip)
+
+    print("Get cookie is working now:",anonymous_user,anon_user_data,response)
+
+    if anon_user_data is None:
+        obj = AnonUser.objects.filter(id__exact=anonymous_user.id).values()
+        value = str(obj[0])
+        set_cookie(response,key="data",value=value,days_expire=30)
+
 class Main(View):
-    def get_client_ip(self):
-        x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
-
-        if x_forwarded_for:
-            ip = x_forwarded_for
-        else:
-            ip = self.request.META.get('REMOTE_ADDR')
-        return ip
-
     def get(self,request, *arg, **kwargs):
         users = User.objects.all()
         posts = Post.objects.all().order_by("-pub_date")
@@ -73,13 +76,6 @@ class Main(View):
             context["create_post_form"] = post_form
 
         response = render(request, "base.html", context)
-        ip = self.get_client_ip()
-        anonymous_user = AnonymousUser.create_user(ip=ip)
-        print(anonymous_user)
-        obj = AnonymousUser.objects.filter(id__exact=anonymous_user.id).values()
-        print("Object: ",obj[0])
-        value = str(obj[0])
-        set_cookie(response,key="data",value=value,days_expire=90)
         return response
 
     @transaction.atomic
@@ -396,17 +392,18 @@ class LikeArticleView(View):
         redirect_url = request.META.get("HTTP_REFERER")
 
         if redirect_url:
+            response = redirect(redirect_url)
             article = Article.objects.get(pk=pk)
             ip = self.get_client_ip()
+            get_cookie(request,response,ip)
+
             try:
                 if request.user.is_authenticated:
                     like = article.likes.get(user=request.user,like=True)
                     article.likes.remove(like)
                     like.delete()
                 else:
-                    anonymous_user = AnonymousUser.objects.get_or_create(ip=ip)
-
-                    like = article.likes.get(anonymous_user=anonymous_user,like=True)
+                    like = article.likes.get(anon_user=request.user,like=True)
                     article.likes.remove(like)
                     like.delete()
             except Like.DoesNotExist:
@@ -414,14 +411,13 @@ class LikeArticleView(View):
                     like = Like.objects.create(user=request.user,like=True)
                     article.likes.add(like)
                 else:
-                    like = Like.objects.create(anonymous_user=ip,like=True)
+                    like = Like.objects.create(anon_user=request.user,like=True)
                     article.likes.add(like)
-            return redirect(redirect_url)
+            return response
         raise PermissionDenied("Invalid url.")
 
 # like a post
 class LikePostView(View):
-
     def get_client_ip(self):
         x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
 
@@ -431,25 +427,33 @@ class LikePostView(View):
             ip = self.request.META.get('REMOTE_ADDR')
         return ip
 
+    def get_post(self,post_id):
+        try:
+            return Post.objects.get(post_id=post_id)
+        except Post.DoesNotExist:
+            raise Http404("Post not found.")
+
     def get(self,request,*args,**kwargs):
         redirect_url = request.META.get("HTTP_REFERER")
         if redirect_url:
+            response = redirect(redirect_url)
             post_id = kwargs["post_id"]
             ip = self.get_client_ip()
-            post = Post.objects.get(post_id=post_id)
+            get_cookie(request,response,ip)
+            post = self.get_post(post_id)
             try:
                 if request.user.is_authenticated:
                     like = post.likes.get(user=request.user,like=True)
                     post.likes.remove(like)
                     like.delete()
 
-                # Check the user is anonymous and have registered by custom AnonymousUser model
+                # Check the user is anonymous and have registered by custom AnonUser model
                 elif request.user.is_anon:
                     like = post.likes.get(anon_user=request.user,like=True)
                     post.likes.remove(like)
                     like.delete()
                 else:
-                    like = post.likes.get(anonymous_user=ip,like=True)
+                    like = post.likes.get(anon_user=request.user,like=True)
                     post.likes.remove(like)
                     like.delete()
             except Like.DoesNotExist:
@@ -457,18 +461,16 @@ class LikePostView(View):
                     like = Like.objects.create(user=request.user,like=True)
                     post.likes.add(like)
 
-                # Check the user is anonymous and have registered by custom AnonymousUser model
+                # Check the user is anonymous and have registered by custom AnonUser model
                 elif request.user.is_anon:
                     like = Like.objects.create(anon_user=request.user,like=True)
                     post.likes.add(like)
                 else:
-                    like = Like.objects.create(anonymous_user=ip,like=True)
+                    like = Like.objects.create(anon_user=request.user,like=True)
                     post.likes.add(like)
 
-            return redirect(redirect_url)
+            return response
         raise PermissionDenied("Invalid url.")
-    def post(self,request,*args,**kwargs):
-        pass
 
 # Dashboard
 class DashboardView(LoginRequiredMixin, View, ContextMixin):
@@ -542,7 +544,9 @@ class UserProfileShowcaseView(View):
         followed = False
         if request.user.is_authenticated:
             try:
-                follower = Follower.objects.get(user=user,follower=request.user)
+                follower = Follower.objects.get(user=user)
+                if request.user in follower.followers.all():
+                    followed = True
             except Follower.DoesNotExist:
                 followed = True
         context = {
@@ -648,14 +652,14 @@ class FollowView(LoginRequiredMixin,View):
         try:
             if request.user.is_authenticated:
                 follower = Follower.objects.get(user=user)
-                followers = follower.follower.all()
+                followers = follower.followers.all()
                 if request.user in followers:
                     Follower.unfollow(user=user, follower=request.user)
                 else:
                     raise FollowerError("UserDoesNotExist")
             if request.user.is_anon:
                 follower = Follower.objects.get(anon_user=user)
-                followers = follower.follower.all()
+                followers = follower.followers.all()
                 if request.user in followers:
                     Follower.unfollow(user=user, follower=request.user)
                 else:
@@ -668,18 +672,111 @@ class FollowView(LoginRequiredMixin,View):
                 Follower.follow(user=user, follower=request.user)
         return redirect(path)
 
+# Video Stream
+class LiveStreamView(View):
+    def get(self,request,*args,**kwargs):
+        return render(request,"pages/video_stream.html")
+
 # To make appointment with doctor.
 class MakeAppointmentView(View):
     def get(self,request,*args,**kwargs):
-        pass
+        doctor_id = kwargs.get("doctor_id",None)
+        doctor = self.get_doctor(doctor_id)
+        if request.user.is_anon:
+            form = AppointmentForm(initial={"doctor":doctor,"clients":request.user})
+        context = {
+            "form": form
+        }
+        return render(request,"pages/appointment.html",context)
+
+    def get_doctor(self,doctor_id):
+        try:
+            return User.objects.get(id=doctor_id)
+        except User.DoesNotExist:
+            raise Http404("Doctor not found.")
 
     def post(self,request,*args,**kwargs):
-        pass
+        doctor_id = kwargs.get("doctor_id",None)
+        context = {}
+        if doctor_id is not None:
+            doctor = self.get_doctor(doctor_id)
+            appointment,created = Appointment.objects.get_or_create(doctor=doctor)
+            if request.user.is_anon:
+                form = AppointmentForm(request.POST)
+                context["form"] = form
+                if form.is_valid(): 
+                    appointment.reason = form.cleaned_data.get("reason")
+                    appointment.clients.add(request.user)
+                    appointment.save()
+                if not created:
+                    messages.info(request,f"You have already made appointment with this doctor. Date: {appointment.date}")
+            elif request.user.is_anonymous:
+                messages.info(request,"You should register as doctor or client.")
+        return render(request,"pages/appointment.html",context)
+
+# To save saved_messages
+class SavedMessagesView(View):
+    def get(self,request,message_type,message_id,*args,**kwargs):
+        match message_type:
+            case "post":
+                self.create_post_message(request,message_id)
+            case "article":
+                self.create_article_message(request,message_id)
+
+        return redirect("base:main")
+
+    def get_post(self,post_id):
+        try:
+            return Post.objects.get(post_id=post_id)
+        except Post.DoesNotExist:
+            raise Http404("Post not found.")
+
+    def create_post_message(self,request,post_id):
+        post = self.get_post(post_id)
+        if request.user.is_authenticated:
+            saved_message,created = SavedMessages.objects.get_or_create(user=request.user)
+            if not created:
+                saved_message.posts.remove(post)
+            else:
+                saved_message.save()
+                saved_message.posts.add(post)
+
+        elif request.user.is_anon:
+            saved_message,created = SavedMessages.objects.get_or_create(anon_user=request.user)
+            if not created:
+                saved_message.posts.remove(post)
+            else:
+                saved_message.save()
+                saved_message.posts.add(post)
+
+    def get_article(self,article_id):
+        try:
+            return Article.objects.get(pk=article_id)
+        except Article.DoesNotExist:
+            raise Http404("Article not found.")
+
+    def create_article_message(Self,request,article_id):
+        article = self.get_article(article_id)
+        if request.user.is_authenticated:
+            saved_message,created = SavedMessages.objects.get_or_create(user=request.user)
+            if not created:
+                saved_message.articles.remove(article)
+            else:
+                saved_message.save()
+                saved_message.articles.add(article)
+
+        elif request.user.is_anon:
+            saved_message,created = SavedMessages.objects.get_or_create(anon_user=request.user)
+            if not created:
+                saved_message.articles.remove(article)
+            else:
+                saved_message.save()
+                saved_message.articles.add(article)
 
 # Realted to Authentiction
 def logout_view(request):
     logout(request)
-    return HttpResponse("<h3>You succesfully logged out.</h3> Login <a href='/'>Home</a>")
+    return redirect("base:main")
 
 
 class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):

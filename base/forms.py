@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import User, Post, Comment, Article
+from .models import User, Post, Comment, Article, Appointment
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.forms import ReadOnlyPasswordHashField, PasswordChangeForm, SetPasswordForm
@@ -81,7 +81,7 @@ class ChangeUserForm(forms.Form):
 class CreatePostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ('owner', 'text', 'photo',)
+        fields = ('owner', 'text', 'photo', 'video',)
 
     def __init__(self, user, *args, **kwargs):
         super(CreatePostForm, self).__init__(*args, **kwargs)
@@ -106,3 +106,6 @@ class CreateArticleForm(forms.ModelForm):
     class Meta:
         model = Article
         exclude = ["author", "date", "views_count", "likes_count"]
+
+class AppointmentForm(forms.Form):
+    reason = forms.CharField(label="Reason",widget=forms.Textarea(),max_length=2048)

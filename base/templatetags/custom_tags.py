@@ -16,6 +16,12 @@ def cut(value):
     time = str(value)
     return time[10:16]
 
+@register.filter(name="get_extension", is_safe=True)
+def get_extension(value):
+    ext = str(value)
+    ext = ext.split("/")
+    return ext[2][5:]
+
 @register.filter(name="filter_comment", is_safe=True)
 def filter(value):
     comment = Comment.objects.filter(post_id__exact=value)
@@ -29,18 +35,9 @@ def filter(value):
     request = value
     return value
 
-def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
-
 @register.filter(name="filter_like",is_safe=True)
 def filter(value):
     global request
-    ip = get_client_ip(request)
     users = []
     anonymous_users = []
     if request.user.is_authenticated:
@@ -51,9 +48,9 @@ def filter(value):
         return "r"
     else:
         for _ in value:
-            anonymous_users.append(_.anonymous_user)
+            anonymous_users.append(_.anon_user)
 
-        if ip in anonymous_users:
+        if request.user in anonymous_users:
             return "s"
         return "r"
 
@@ -64,7 +61,7 @@ def check_followed(follower):
         request_user = request.user
         followed = True
         try:
-            Follower.objects.get(user__exact=follower,follower__exact=request_user)
+            Follower.objects.get(user__exact=follower,followers__exact=request_user)
         except Follower.DoesNotExist:
             followed = False
         return followed

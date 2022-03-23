@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User,AnonymousUser,Article,Post,Like,Comment,ChildComment,CommentArticle,ChildCommentArticle,ChatMessage,ChatRoom,Follower,Notification
+from .models import User,AnonUser,Article,Post,Like,Comment,ChildComment,CommentArticle,ChildCommentArticle,ChatMessage,ChatRoom,Follower,Notification,Appointment,SavedMessages
 from .forms import UserCreationForm,UserChangeForm
 
 class UserAdmin(BaseUserAdmin):
@@ -56,7 +56,7 @@ class ChatRoomAdmin(admin.ModelAdmin):
     list_display = ("room_id","outgoing","incoming",)
 
 admin.site.register(User,UserAdmin)
-admin.site.register(AnonymousUser)
+admin.site.register(AnonUser)
 admin.site.register(Article,ArticleAdmin)
 admin.site.register(Post,PostAdmin)
 admin.site.register(Like)
@@ -68,4 +68,6 @@ admin.site.register(ChatMessage,ChatMessageAdmin)
 admin.site.register(ChatRoom,ChatRoomAdmin)
 admin.site.register(Follower)
 admin.site.register(Notification,NotificationAdmin)
+admin.site.register(Appointment)
+admin.site.register(SavedMessages)
 admin.site.unregister(Group)
