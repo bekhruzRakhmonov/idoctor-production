@@ -11,13 +11,20 @@ from rest_framework.response import Response
 from rest_framework import parsers
 from django.core.serializers import serialize
 from django.db.models import Q
-from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.hashers import make_password
 from base.models import User,Comment,ChildComment,Post,Article,CommentArticle,ChildCommentArticle,Like
-from .serializers import UserSerializer,PostSerializer,CreatePostSerializer,CommentSerializer,CustomTokenObtainPairSerializer,CreateCommentSerializer,ArticleSerializer,CreateArticleSerializer,ArticleCommentSerializer,ArticleCommentsSerializer,LikePostSerializer,LikeArticleSerializer,UserPasswordChangeSerializer,UserPasswordResetEmailSerializer,UserPasswordResetSerializer, FollowerSerializer
+from .jwt_serializers import CustomTokenObtainPairSerializer,CustomTokenObtainPairSerializerForAnonUser,TokenObtainSerializer
+from rest_framework_simplejwt.views import TokenViewBase
+from .serializers import UserSerializer,PostSerializer,CreatePostSerializer,CommentSerializer,CreateCommentSerializer,ArticleSerializer,CreateArticleSerializer,ArticleCommentSerializer,ArticleCommentsSerializer,LikePostSerializer,LikeArticleSerializer,UserPasswordChangeSerializer,UserPasswordResetEmailSerializer,UserPasswordResetSerializer, FollowerSerializer
+
+class TokenObtainPairView(TokenViewBase):
+    _serializer_class = TokenObtainSerializer
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+class CustomTokenObtainPairForAnonUserView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializerForAnonUser
 
 class CreateUser(CreateAPIView):
     queryset = User.objects.all()
@@ -499,4 +506,5 @@ class FollowView(APIView):
             serializer.save()
             return Response(serializer.validated_data,status=status.HTTP_201_CREATED)
         return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
+    
     

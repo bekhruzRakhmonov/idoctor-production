@@ -3,11 +3,15 @@
 
 {% block content %}
     <div class="container card" style="width:650px;">
-        <h4>{{article.author}}</h4>
-        <headline style="font-size: 26px;">{{article.headline}}</headline>
+      <div style="display: flex;margin-top: 10px;">
+        <img src="{{article.author.image.url}}" style="width:55px;height: 55px;border-radius: 100%;object-fit: cover;">
+        <div>
+          <h4><b>Dr.</b>{{article.author.name}}</h4>
+          <a href="{% url 'base:article-detail' article.id %}"><small class="text-muted">{{ article.date }}</small></a></h5>
+        </div>
         {% if request.user == article.author %}
-          <div class="dropdown">
-            <i class="fas fa-ellipsis-h" id="dropdownMenuLink" onmouseover="this.style.color='blue'" onmouseout="this.style.color='black'" style="font-size:20px;cursor: pointer;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+          <div class="dropdown" style="margin-left: 270px;">
+            <i class="fas fa-ellipsis-h" id="dropdownMenuLink" onmouseover="this.style.color='blue'" onmouseout="this.style.color='black'" style="font-size:20px;cursor: pointer;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:20px;cursor: pointer;"></i>
 
             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-left: -140px;">
               <a class="dropdown-item" href="{% url 'base:edit-article' article.id %}">Edit</a>
@@ -15,11 +19,19 @@
             </div>
           </div>
         {% endif %}
+      </div>
+      <headline style="font-size: 26px;">{{article.headline}}</headline>
         <br>
         <body>{{article.body|safe}}</body>
         <div class="card-footer bg-white">
       {% for comment in article.article_comment.all %}
-      <b>{{comment.user}}</b>
+      <b>
+        {% if comment.user != None %}
+          {{comment.user}}
+        {% else %}
+          {{comment.anon_user}}
+        {% endif %}
+      </b>
         {% for c in comment.comment.all %}
           <p>{{c.content}} <em> {{c.date}}</em></p>
         {% endfor %}

@@ -5,6 +5,12 @@
 <form method="post">
 	{% csrf_token %}
 	{{form|crispy}}
-	<button type="submit">Make Appointment</button>
+	{% if messages %}
+		{% for message in messages %}
+			<b>{{message}}</b><a href="ds">Yes</a>
+		{% endfor %}
+	{% endif %}
+	<br>
+	<button type="submit" class="btn btn-secondary">{{button_name}}</button>
 </form>
 {% endblock %}

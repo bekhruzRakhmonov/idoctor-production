@@ -23,14 +23,18 @@ from django.utils.text import slugify
 from django.contrib import messages
 from django.views.decorators.clickjacking import xframe_options_exempt
 from .cookies import set_cookie,b64_decode
-from .models import User, AnonUser, Post, Article, Like, Comment, ChildComment, CommentArticle, ChildCommentArticle, ChatMessage, ChatRoom, Follower, Notification, Appointment, SavedMessages
+from .models import User, AnonUser, Post, Article, Like, Comment, ChildComment, CommentArticle, ChildCommentArticle, ChatMessage, ChatRoom, Follower, Notification, Client, Appointment, SavedMessages
 from .forms import UserCreationForm, UserLoginForm, UserPasswordChangeForm, UserSetPasswordForm, ChangeUserForm,CreatePostForm, PostCommentForm, CreateArticleForm, AppointmentForm
 import json
 import threading
-import logging
 import base64
 from . import notification
 import mimetypes
+import datetime
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 # https://support.lenovo.com/uz/en/solutions/ht505250-how-to-reduce-or-expand-system-partition-c-drive-size-in-windows
 
 to_be_decoded = "VGhpcyBpcyBHZWVrc0ZvckdlZWtzIDQ1NDU0NSAjICQlNjc4KiZeQCE="
@@ -44,14 +48,25 @@ print(threading.get_native_id())
 
 def get_cookie(request,response,ip):
     anon_user_data = request.COOKIES.get("data",None)
-    anonymous_user = AnonUser.create_user(ip=ip)
+    anon_user = AnonUser.create_user(ip=ip)
 
-    print("Get cookie is working now:",anonymous_user,anon_user_data,response)
+    print("Get cookie is working now:",anon_user,anon_user_data,response)
 
     if anon_user_data is None:
-        obj = AnonUser.objects.filter(id__exact=anonymous_user.id).values()
+        obj = AnonUser.objects.filter(id__exact=anon_user.id).values()
         value = str(obj[0])
         set_cookie(response,key="data",value=value,days_expire=30)
+        return
+    return None
+
+def get_client_ip(request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
+        if x_forwarded_for:
+            ip = x_forwarded_for
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
 
 class Main(View):
     def get(self,request, *arg, **kwargs):
@@ -60,15 +75,21 @@ class Main(View):
         comments = Comment.objects.all()
         likes = Like.objects.all()
 
+        recent_activity = request.session.get("recent",None)
+
         context = {
             "users": users,
             "posts": posts,
             "likes": likes,
-            "comments": comments
+            "comments": comments,
+            "recent_activity": recent_activity,
         }
 
-        if request.user.is_authenticated:
-            notifications = Notification.objects.filter(to_user__exact=request.user).order_by("-date")
+        if request.user.is_authenticated or request.user.is_anon:
+            if request.user.is_authenticated:
+                notifications = Notification.objects.filter(to_user__exact=request.user).order_by("-date")
+            else:
+                notifications = Notification.objects.all()
             post_form = CreatePostForm(request.user)
             comment_form = PostCommentForm
             context["notifications"] = notifications
@@ -157,14 +178,23 @@ class SearchView(ListView):
         x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
         print(x_forwarded_for)
         query = self.request.GET.get("q","page")
-        if self.request.user.is_anonymous:        
+        if self.request.user.is_anonymous or self.request.user.is_anon:        
             object_list = User.objects.filter(
                 Q(name__contains=query)|Q(email__contains=query)|Q(name__icontains=query)|Q(email__icontains=query)
             )
-            return object_list      
-        return User.objects.filter(
+            return object_list
+        elif self.request.user.is_authenticated:
+            object_list = User.objects.filter(
                 Q(name__contains=query)|Q(email__contains=query)|Q(name__icontains=query)|Q(email__icontains=query)
-            ).exclude(email=self.request.user.email)
+            ).exclude(email=self.request.user.email)      
+            return object_list
+
+    def get_context_data(self,**kwargs):
+        context = super().get_context_data(**kwargs)
+        query = self.request.GET.get("q","page")
+        context["query"] = query
+        return context
+
 
 
 class PostCommentView(View):
@@ -217,7 +247,7 @@ class PostCommentView(View):
                 data = comment.comment.latest("date")
                 data_dict = {}
                 for d in data.child_comment.all():
-                    data_dict = dict((("user_id",d.user.id),("post_id",d.post_id)))
+                    data_dict = dict((("user_id",d.anon_user.id),("post_id",d.post_id)))
                 if data_dict["user_id"] == request.user.id and str(data_dict["post_id"]) == post_id:
                     comment.comment.add(child_comment)
                 else:
@@ -333,8 +363,15 @@ class ArticleDetailView(generic.detail.DetailView):
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
         article = Article.objects.get(pk=self.kwargs["pk"])
+        print(datetime.datetime.date)
+        self.request.session["recent"] = {
+            "date": str(datetime.datetime.now())[:10],
+            "time": str(datetime.datetime.now())[10:16],
+            "headline":article.headline,
+            "pk":article.pk
+        }
         if not self.request.user.is_anonymous:
-            related_articles = Article.objects.filter(Q(headline__icontains=article.headline)|Q(body__icontains=article.headline)|Q(body__icontains=article.headline)|Q(body__icontains=article.body)|Q(headline__in=article.body)|Q(headline__in=article.headline)|Q(headline__istartswith=article.headline)|Q(headline__startswith=article.headline)|Q(author__exact=self.request.user)).exclude(pk__exact=article.pk)
+            related_articles = Article.objects.filter(Q(headline__icontains=article.headline)|Q(body__icontains=article.headline)|Q(body__icontains=article.headline)|Q(body__icontains=article.body)|Q(headline__in=article.body)|Q(headline__in=article.headline)|Q(headline__istartswith=article.headline)|Q(headline__startswith=article.headline)|Q(author__exact=article.author)).exclude(pk__exact=article.pk)
             context["related_articles"] = related_articles
             return context
         related_articles = Article.objects.filter(Q(headline__icontains=article.headline)|Q(body__icontains=article.headline)|Q(body__icontains=article.headline)|Q(body__icontains=article.body)|Q(headline__in=article.body)|Q(headline__in=article.headline)|Q(headline__istartswith=article.headline)|Q(headline__startswith=article.headline))
@@ -402,15 +439,17 @@ class LikeArticleView(View):
                     like = article.likes.get(user=request.user,like=True)
                     article.likes.remove(like)
                     like.delete()
-                else:
+                elif request.user.is_anon:
                     like = article.likes.get(anon_user=request.user,like=True)
                     article.likes.remove(like)
                     like.delete()
+                else:
+                    messages.info(request,"You should login as doctor or client")
             except Like.DoesNotExist:
                 if request.user.is_authenticated:
                     like = Like.objects.create(user=request.user,like=True)
                     article.likes.add(like)
-                else:
+                elif request.user.is_anon:
                     like = Like.objects.create(anon_user=request.user,like=True)
                     article.likes.add(like)
             return response
@@ -509,7 +548,6 @@ class DashboardView(LoginRequiredMixin, View, ContextMixin):
                     user.save()
                 messages.info(request,"Your changes are successfully changed")
             except Exception as e:
-                print(e)
                 messages.info(request,"This email is already exists")
                        
         ctx = self.get_context_data()
@@ -575,7 +613,6 @@ def chat_api(request):
     return JsonResponse({"room_id": room_id})
 
 class ChatRoomView(LoginRequiredMixin, View):
-    @method_decorator(csrf_protect)
     def get(self, request, *args, **kwargs):
         context = {}
         message_users = ChatRoom.objects.filter(Q(outgoing=request.user)|Q(incoming=request.user))
@@ -589,7 +626,6 @@ class ChatRoomView(LoginRequiredMixin, View):
         except KeyError:
             print("KeyError occured")
         return render(request, "pages/chat.html", context)
-    @method_decorator(csrf_protect)
     def post(self, request, *args, **kwargs):
         message = request.POST.get("message_text")
         context = {}
@@ -640,12 +676,7 @@ class Login(View):
         context["form_error"] = self.context
         return context
 
-
-class FollowView(LoginRequiredMixin,View):
-    def get_redirect_field_name(self):
-        path = self.request.path
-        return path
-
+class FollowView(View):
     def get(self, request, user_id,*args, **kwargs):
         path = request.META.get('HTTP_REFERER')
         user = User.objects.get(pk=user_id)
@@ -658,8 +689,8 @@ class FollowView(LoginRequiredMixin,View):
                 else:
                     raise FollowerError("UserDoesNotExist")
             if request.user.is_anon:
-                follower = Follower.objects.get(anon_user=user)
-                followers = follower.followers.all()
+                follower = Follower.objects.get(user=user)
+                followers = follower.anon_followers.all()
                 if request.user in followers:
                     Follower.unfollow(user=user, follower=request.user)
                 else:
@@ -678,15 +709,32 @@ class LiveStreamView(View):
         return render(request,"pages/video_stream.html")
 
 # To make appointment with doctor.
-class MakeAppointmentView(View):
+class MakeAppointmentView(View,ContextMixin):
+    def get_appointment(self,doctor):
+        try:
+            return Appointment.objects.get(doctor=doctor)
+        except Appointment.DoesNotExist:
+            return None
+
     def get(self,request,*args,**kwargs):
         doctor_id = kwargs.get("doctor_id",None)
         doctor = self.get_doctor(doctor_id)
-        if request.user.is_anon:
-            form = AppointmentForm(initial={"doctor":doctor,"clients":request.user})
+        appointment = self.get_appointment(doctor)
+        button_name = "Make Appointment"
         context = {
-            "form": form
+            "form": AppointmentForm,
+            "button_name": button_name,
         }
+        ip = get_client_ip(request)
+        response = render(request,"pages/appointment.html")
+        get_cookie(request,response,ip)
+        if request.user.is_anon:
+            if appointment is not None:
+                appointments = appointment.clients.filter(client=request.user)
+                if len(appointments) > 0:
+                    context["button_name"] = "Update Appointment"
+                    form = AppointmentForm(initial={"reason": appointments[0].reason})
+                    context["form"] = form
         return render(request,"pages/appointment.html",context)
 
     def get_doctor(self,doctor_id):
@@ -697,30 +745,39 @@ class MakeAppointmentView(View):
 
     def post(self,request,*args,**kwargs):
         doctor_id = kwargs.get("doctor_id",None)
-        context = {}
+        form = AppointmentForm(request.POST)
+        button_name = "Upadate Button"
+        context = {
+            "form": form,
+            "button_name": button_name,
+        }
         if doctor_id is not None:
             doctor = self.get_doctor(doctor_id)
-            appointment,created = Appointment.objects.get_or_create(doctor=doctor)
-            if request.user.is_anon:
-                form = AppointmentForm(request.POST)
-                context["form"] = form
-                if form.is_valid(): 
-                    appointment.reason = form.cleaned_data.get("reason")
-                    appointment.clients.add(request.user)
-                    appointment.save()
-                if not created:
-                    messages.info(request,f"You have already made appointment with this doctor. Date: {appointment.date}")
-            elif request.user.is_anonymous:
-                messages.info(request,"You should register as doctor or client.")
+            if form.is_valid(): 
+                reason = form.cleaned_data.get("reason")
+                if request.user.is_anon:
+                    appointment,created = Appointment.objects.get_or_create(doctor=doctor)
+                    if created:
+                        client = Client.objects.create(client=request.user,reason=reason)
+                        appointment.clients.add(client)
+                        appointment.save()
+                    else:
+                        appointments = appointment.clients.filter(client=request.user)
+                        appointment_id = appointments[0].id
+                        appointment = Client.objects.get(id=appointment_id)
+                        appointment.reason = reason
+                        appointment.save()
+                elif request.user.is_anonymous:
+                    messages.info(request,"You should register as doctor or client.")
         return render(request,"pages/appointment.html",context)
 
 # To save saved_messages
 class SavedMessagesView(View):
     def get(self,request,message_type,message_id,*args,**kwargs):
-        match message_type:
-            case "post":
-                self.create_post_message(request,message_id)
-            case "article":
+        #match message_type:
+        if message_type == "post":
+            self.create_post_message(request,message_id)
+        elif message_type == "article":
                 self.create_article_message(request,message_id)
 
         return redirect("base:main")

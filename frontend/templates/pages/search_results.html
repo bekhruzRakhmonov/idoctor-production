@@ -8,9 +8,9 @@
             <div class="ibox float-e-margins">
                 <div class="ibox-content">
                     <h2>
-                        160 results found for: <span class="text-navy">"Bootdey"</span>
+                        Results found for: <span class="text-navy">"{{query}}"</span>
                     </h2>
-                    <small>Request time  (0.23 seconds)</small>
+                    <small>Request time  ({{time}} seconds)</small>
         
                     <div class="search-form">
                         <form action="{% url 'base:search' %}" method="get">
@@ -60,11 +60,11 @@
                                 </div>
                             </div>
                             <a href="{% url 'base:follow' search.name|slugify search.pk %}">
-                                {% if request.user.is_authenticated and request.user|filter_user %}
-                                    {% if search|check_followed == False %}
-                                    <button style="height: 30px;width: 120px;border: 0;border-radius: 15px;color: white;background-color: blue;" onmouseover="this.style.backgroundColor='#006db9'" onmouseout="this.style.backgroundColor='blue'">Follow</button>
+                                {% if not request.user.is_anonymous and request|filter_user %}
+                                    {% if search|check_followed %}
+                                        <button style="height: 30px;width: 120px;border: 0;border-radius: 15px;color: white;background-color: #b90000;" onmouseover="this.style.backgroundColor='#b90000d6'" onmouseout="this.style.backgroundColor='#b90000'">Unfollow</button>
                                     {% else %}
-                                    <button style="height: 30px;width: 120px;border: 0;border-radius: 15px;color: white;background-color: #b90000;" onmouseover="this.style.backgroundColor='#b90000d6'" onmouseout="this.style.backgroundColor='#b90000'">Unfollow</button>
+                                    <button style="height: 30px;width: 120px;border: 0;border-radius: 15px;color: white;background-color: blue;" onmouseover="this.style.backgroundColor='#006db9'" onmouseout="this.style.backgroundColor='blue'">Follow</button>
                                     {% endif %}
                                 {% else %}
                                     <button style="height: 30px;width: 120px;border: 0;border-radius: 15px;color: white;background-color: blue;" onmouseover="this.style.backgroundColor='#006db9'" onmouseout="this.style.backgroundColor='blue'">Follow</button>

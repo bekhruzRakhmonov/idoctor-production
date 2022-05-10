@@ -19,13 +19,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		command = message["command"]
 		self.room_id = await get_room_id(message["from"],message["to"])
 		self.room_group_name = "chat_%s" % self.room_id
-		match message["command"]:
-			case "join":
-				await self.join_room(self.room_id)
-			case "send":
-				await self.send_room(message,self.room_id)
-			case "leave":
-				await self.leave_room(self.room_id)
+		# match message["command"]:
+		if message["command"] == "join":
+			await self.join_room(self.room_id)
+		elif message["command"] == "send":
+			await self.send_room(message,self.room_id)
+		elif message["command"] == "leave":
+			await self.leave_room(self.room_id)
 
 	async def disconnect(self,close_code):
 		await self.leave_room(self.room_id)
@@ -103,4 +103,5 @@ class LiveStreamConsumer(AsyncWebsocketConsumer):
 			with open(f"./media/video_streams/{self.user_id}.webm","wb") as f:
 				for d in self.video_data:
 					f.write(d)
+					await self.send(json.dumps({"streaming_data":d}))
 		

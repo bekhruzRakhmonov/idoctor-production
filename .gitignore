@@ -2,3 +2,14 @@ __pycache__/
 pgdata/
 .env
 .venv/
+ai/
+.vscode/
+stat.py
+consumers1.py
+logger.py
+notes
+client
+index.js
+socket.js
+video_stream.js
+notes.txt

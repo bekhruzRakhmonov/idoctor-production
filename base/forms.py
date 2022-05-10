@@ -11,12 +11,33 @@ class UserLoginForm(forms.Form):
     password = forms.CharField(
         label='Password', widget=forms.PasswordInput(attrs={'autocomplete': 'on'}))
 
+PATIENT_CHOICES = (
+    ("HEADACHE","Headache"),
+    ("TEETHACHE","Teethache"),
+
+)
+class SurveyForm(forms.Form):
+    patients = forms.MultipleChoiceField(choices=PATIENT_CHOICES,widget=forms.CheckboxSelectMultiple)
+
+# https://www.sgu.edu/blog/medical/types-of-physicians-in-demand/
+CATEGORIES = (
+    ("Family physicians","Family physicians"),
+    ("Internists","Internists"),
+    ("Emergency physicians","Emergency physicians"),
+    ("Psychiatrists","Psychiatrists"),
+    ("Obstetricians and gynecologists","Obstetricians and gynecologists"),
+    ("Neurologists","Neurologists"),
+    ("Radiologists","Radiologists"),
+    ("Anesthesiologists","Anesthesiologists"),
+    ("Pediatricians","Pediatricians"),
+    ("Cardiologists","Cardiologists"),
+)
 
 class UserCreationForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(
         label='Password confirmation', widget=forms.PasswordInput)
-
+    categories = forms.ChoiceField(choices=CATEGORIES)
     class Meta:
         model = User
         fields = ['email', 'name', 'bio', 'image']

@@ -55,11 +55,21 @@
       <p class="card-text">{{ post.text }}</p>
       {% if post.photo %}
       <img class="card-img-bottom" src="{{ post.photo.url }}" alt="Card image cap">
+      {% elif post.video %}
+      <video style="width: 100%;" controls>
+        <source src="{{post.video.url}}" type="video/{{post.video|get_extension}}">
+      </video>
       {% endif %}
     </div>
     <div class="card-footer bg-white">
       {% for comment in post.post_comment.all %}
-      <b>{{comment.user}}</b>
+      <b>
+        {% if comment.user != None %}
+          {{comment.user}}
+        {% else %}
+          {{comment.anon_user}}
+        {% endif %}
+      </b>
         {% for c in comment.comment.all|dictsort:"date" %}
           <p>{{c.content}} <em> {{c.date}}</em></p>
         {% endfor %}

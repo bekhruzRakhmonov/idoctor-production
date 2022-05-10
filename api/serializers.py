@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from base.models import User,Comment,CommentArticle,ChildCommentArticle,ChildComment,Post,Article,Follower
 from base.exceptions import FollowerError
 from django.core import serializers as dj_serializers
@@ -99,20 +98,7 @@ class UserPasswordResetSerializer(serializers.ModelSerializer):
         new_password = validated_data["password1"]
         instance.set_password(new_password)
         instance.save()
-        return instance
-
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls,user):
-        token = super().get_token(user)
-
-        # username = dj_serializers.serialize("json",User.objects.get(email=user.email).name)
-        # person = serializers.serialize("json", Person.objects.get(id = 25), fields = ("firstName", "middleName", "lastName"))
-        # print(user_json)
-        # Adding custom token
-        token["user"] = user.email,user.name,user.bio
-
-        return token
+        return instanceS
 
 class CommentSerializer(serializers.ModelSerializer):
     url = serializers.CharField(source="get_absolute_url",read_only=True)
@@ -263,4 +249,3 @@ class FollowerSerializer(serializers.Serializer):
         except (FollowerError,Follower.DoesNotExist):
             if not follower_user == user:
                 Follower.follow(user=user, follower=follower_user)
-

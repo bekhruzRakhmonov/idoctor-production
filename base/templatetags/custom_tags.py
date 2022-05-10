@@ -57,15 +57,18 @@ def filter(value):
 @register.filter(name="check_followed")
 def check_followed(follower):
     global request
+    followed = False
     if not request.user.is_anonymous:
         request_user = request.user
-        followed = True
         try:
-            Follower.objects.get(user__exact=follower,followers__exact=request_user)
+            follower = Follower.objects.get(user__exact=follower)
+            if request.user in (follower.followers.all() or follower.anon_followers.all()):
+                print(follower.followers.all(),follower.anon_followers.all())
+                followed = True
         except Follower.DoesNotExist:
             followed = False
         return followed
-    return False
+    return followed
 
 @register.inclusion_tag("components/recommended_users.html",takes_context=True)
 def get_context(context):

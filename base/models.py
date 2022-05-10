@@ -12,6 +12,7 @@ from django.utils import timezone
 import datetime
 import random
 import uuid
+import typing
 
 class CustomUserManager(BaseUserManager):
     def create_superuser(self,email,name,bio,password=None,**others):
@@ -48,6 +49,19 @@ class User(AbstractBaseUser,PermissionsMixin):
     name = models.CharField(max_length=200,null=True)
     email = models.EmailField(unique=True,null=True)
     bio = models.TextField(null=True)
+    profession_categories = (
+        ("Family physicians","Family physicians"),
+        ("Internists","Internists"),
+        ("Emergency physicians","Emergency physicians"),
+        ("Psychiatrists","Psychiatrists"),
+        ("Obstetricians and gynecologists","Obstetricians and gynecologists"),
+        ("Neurologists","Neurologists"),
+        ("Radiologists","Radiologists"),
+        ("Anesthesiologists","Anesthesiologists"),
+        ("Pediatricians","Pediatricians"),
+        ("Cardiologists","Cardiologists"),
+    )
+    profession = models.CharField(choices=profession_categories,max_length=255,null=True)
     status = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -69,7 +83,7 @@ class User(AbstractBaseUser,PermissionsMixin):
         return False
 
 class AnonUser(models.Model):
-    username = models.CharField(max_length=2048,null=True,blank=True)
+    username = models.CharField(max_length=255,null=True,blank=True,unique=True)
     ip = models.GenericIPAddressField()
     date_joined = models.DateTimeField(auto_now_add=True)
 
@@ -93,7 +107,7 @@ class AnonUser(models.Model):
 
     @property
     def is_anonymous(self):
-        return True
+        return False
 
     @property
     def is_anon(self):
@@ -124,20 +138,31 @@ class Follower(models.Model):
             return 0
 
     @classmethod
-    def follow(cls,user: User,follower: User) -> None:
+    def follow(cls,user: User,follower: typing.Union[User,AnonUser]) -> None:
         obj,created = cls.objects.get_or_create(user=user)
-        if not created:
-            obj.followers.add(follower)
-            obj.save()
+        if isinstance(follower,User):
+            if not created:
+                obj.followers.add(follower)
+                obj.save()
+            else:
+                obj.followers.add(follower)
+                obj.save()
         else:
-            obj.followers.add(follower)
-            obj.save()
+            if not created:
+                obj.anon_followers.add(follower)
+                obj.save()
+            else:
+                obj.anon_followers.add(follower)
+                obj.save()
         return obj
 
     @classmethod
-    def unfollow(cls,user: User,follower: User) -> None:
+    def unfollow(cls,user: User,follower: typing.Union[User,AnonUser]) -> None:
         obj = cls.objects.get(user=user)
-        obj.followers.remove(follower)
+        if isinstance(follower,User):
+            obj.followers.remove(follower)
+        else:
+            obj.anon_followers.remove(follower)
         return obj
 
 class ChatMessage(models.Model):
@@ -203,7 +228,7 @@ class Post(models.Model):
         return cls.objects.filter(owner=user).count()
 
 class Comment(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="comment_user",blank=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="comment_user",blank=True,null=True)
     anon_user = models.ForeignKey(AnonUser,on_delete=models.CASCADE,related_name="comment_anon_user",blank=True,null=True)
     post = models.ForeignKey(Post,on_delete=models.CASCADE,related_name="post_comment",null=True)
     comment = models.ManyToManyField("ChildComment",related_name="child_comment")
@@ -219,7 +244,8 @@ class ChildComment(models.Model):
     date = models.DateTimeField(auto_now_add=True,null=True)
 
 class CommentArticle(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="comment_article_user")
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="comment_article_user",blank=True,null=True)
+    anon_user = models.ForeignKey(AnonUser,on_delete=models.CASCADE,related_name="comment_article_anon_user",blank=True,null=True)
     article = models.ForeignKey("Article",on_delete=models.CASCADE,related_name="article_comment")
     comment = models.ManyToManyField("ChildCommentArticle",related_name="child_comment_article")
  
@@ -289,6 +315,7 @@ class Notification(models.Model):
         ("comment_article","COMMENT ARTICLE"),
     )
     from_user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="notf_from_user",null=True,blank=True)
+    from_anon_user = models.ForeignKey(AnonUser,on_delete=models.CASCADE,related_name="notf_from_anon_user",null=True,blank=True)
     to_user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="notf_to_user",null=True,blank=True)
     to_anon_user = models.ForeignKey(AnonUser,on_delete=models.CASCADE,related_name="notf_to_anon_user",null=True,blank=True)
     notf_comment = models.ForeignKey(Comment,on_delete=models.CASCADE,related_name="notf_comments",null=True)
@@ -307,16 +334,24 @@ class Notification(models.Model):
         return msg
 
     @classmethod
-    def get_count(cls,to_user):
-        count = cls.objects.filter(to_user=to_user).count()
+    def get_count(cls,to_user=None,to_anon_user=None):
+        if to_anon_user is None:
+            count = cls.objects.filter(to_user=to_user).count()
+        else:
+            count = cls.objects.filter(to_anon_user=to_anon_user).count()
         return count
+
+class Client(models.Model):
+    client = models.ForeignKey(AnonUser,on_delete=models.CASCADE,related_name="appointment_client",blank=True,null=True)
+    doctor = models.ForeignKey(User,on_delete=models.CASCADE,related_name="appointment_doctor",blank=True,null=True)
+    reason = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
 
 class Appointment(models.Model):
     doctor = models.ForeignKey(User,on_delete=models.CASCADE,related_name="appointment_user")
-    clients = models.ManyToManyField(AnonUser,related_name="appointment_clients")
-    doctors = models.ManyToManyField(User,related_name="appointment_doctors")
-    reason = models.TextField()
+    clients = models.ManyToManyField(Client,related_name="appointment_clients")
     date = models.DateTimeField(auto_now_add=True)
+    checked = models.BooleanField(default=False)
 
 class SavedMessages(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="saved_messages_user",blank=True,null=True)

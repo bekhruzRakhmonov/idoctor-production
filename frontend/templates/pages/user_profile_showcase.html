@@ -6,7 +6,6 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 <div class="container emp-profile">
-    <a href="{% url 'base:appointment' user.id %}"><button>Make Appointment</button></a>
             <form method="post">
                 <div class="row">
                     <div class="col-md-4">
@@ -33,7 +32,10 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="col-md-2" style="display: flex;margin-left: -20px;">
+                    <div class="col-md-2" style="display: flex;margin-left: -200px;">
+                        <div style="margin-left: 5px;">
+                            <a href="{% url 'base:appointment' user.id %}"><button class="btn btn-secondary">Make Appointment</button></a>
+                        </div>
                         <div style="margin-left: 5px;">
                             <a href="/chat/{{user.pk}}"><button class="btn btn-outline-primary" type="button">Message</button></a>
                         </div>
@@ -87,7 +89,7 @@
                                     {% for article in articles %}
                                         <div class="row">
                                             <div class="col-md-6" style="width: 300px;">
-                                                <label style="width: 300px;"><a href="{% url 'article-detail' article.id %}" style="color:black;width: 300px;word-wrap: break-word;">{{article.headline}}</a></label>
+                                                <label style="width: 300px;"><a href="{% url 'base:article-detail' article.id %}" style="color:black;width: 300px;word-wrap: break-word;">{{article.headline}}</a></label>
                                             </div>
                                             <div class="col-md-6">
                                                 <p>{{article.date}}</p>

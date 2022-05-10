@@ -5,7 +5,7 @@ from .models import AnonUser
 from django.contrib.auth.models import AnonymousUser
 from .cookies import b64_decode
 import json
-import ast
+import time
 
 def get_user(request):
     if not hasattr(request, "_cached_user"):
@@ -52,22 +52,47 @@ class AnonUserMiddleware:
             for user in all_anon_users:
                 anon_users_ip.append(user.ip)
                 
-            if anon_user_data is None:
-                if anon_user_ip in anon_users_ip:
-                    anon_user = self.get_anon_user_by_ip(anon_user_ip)
-                    request.user = anon_user
+            #if anon_user_data is None:
+            if anon_user_ip in anon_users_ip:
+                anon_user = self.get_anon_user_by_ip(anon_user_ip)
+                request.user = anon_user
             else:
                 decoded_data = b64_decode(anon_user_data)
-                print("Decoded data: ",decoded_data)
-                anon_user_id = int(decoded_data[7:9])
-                anon_user = self.get_anon_user_by_id(anon_user_id)
-                if anon_user is None:
-                    request.user = SimpleLazyObject(lambda: get_user(request))
+                if decoded_data is not None:
+                    print("Decoded data: ",decoded_data)
+                    anon_user_id = int(decoded_data[7:9])
+                    anon_user = self.get_anon_user_by_id(anon_user_id)
+                    if anon_user is None:
+                        request.user = SimpleLazyObject(lambda: get_user(request))
+                    else:
+                        request.user = anon_user
                 else:
-                    request.user = anon_user
+                    request.user.is_anon = False
 
         response = self.get_response(request)
 
         # Code to be executed for each request/response after
         # the view is called.
+        return response
+
+class StatsMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.total = 0
+
+    def __call__(self,request):
+        start_time = time.time()
+        request.start_time = start_time
+        response = self.get_response(request)
+ 
+        total = time.time() - start_time
+        
+        response["X-total-time"] = int(self.total * 1000)
+
+        return response
+
+    def process_template_response(self, request, response):
+        total = time.time() - request.start_time
+        if response.context_data is not None:
+            response.context_data["time"] = int(total * 1000)
         return response

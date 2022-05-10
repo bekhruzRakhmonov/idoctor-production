@@ -8,7 +8,7 @@ def error_403(request, exception):
 
 def error_404(request, exception):
 	context = {
-		"error":exception
+		"error": "Page not found."
 	}
 	return render(request,"pages/errors.html",context)
 

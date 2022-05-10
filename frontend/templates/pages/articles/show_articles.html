@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block article %}
 	{% for article in articles %}
-		<article>{{article.headline}}</article>
+		<a href="{% url 'base:article-detail' article.pk %}"><article>{{article.headline}}</article></a>
 	{% endfor %}
 {% endblock %}

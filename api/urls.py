@@ -12,6 +12,10 @@ urlpatterns = [
     path('password-reset/',views.UserPasswordResetEmailView.as_view(),name="password-reset-email"),
     path('password-reset/<uuid:user_id>/',views.UserPasswordResetView.as_view(),name="password-reset"),
 
+    # anon users authentication and authoration
+    path('token2/',views.CustomTokenObtainPairForAnonUserView.as_view(),name="token_obtain_pair"),
+    path('token2/refresh/',TokenRefreshView.as_view(),name="token_refresh"),
+
     # post
     path('get-post/',views.GetPost.as_view(),name="get-post"),
     path('get-post/<uuid:pk>/',views.GetPostById.as_view(),name="get-post-by-id"),

@@ -60,6 +60,7 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = "base.User"
+AUTH_ANON_USER_MODEL = "base.AnonUser"
 AUTHENTICATION_BACKENDS = ["base.backends.CustomBackend"]
 ADMIN_LOGIN = os.getenv("ADMIN_LOGIN")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
@@ -75,6 +76,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 
     "base.middleware.AnonUserMiddleware",
+    "base.middleware.StatsMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -137,6 +139,7 @@ SIMPLE_JWT = {
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
     "TOKEN_TYPE_CLAIM": "token_type",
     "JTI_CLAIM": "jti",
+    "TOKEN_USER_CLASS": ("rest_framework_simplejwt.models.TokenUser","api.models.TokenAnonUser"),
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
     "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
@@ -148,11 +151,11 @@ SIMPLE_JWT = {
 DATABASES = {
     "default": {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_NAME'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': 'db',
-        'PORT': 5432,
+        'NAME': 'idoctor', # os.environ.get('POSTGRES_NAME')
+        'USER': 'postgres', # os.environ.get('POSTGRES_USER')
+        'PASSWORD': 'Idonotknow1@', # os.environ.get('POSTGRES_PASSWORD')
+        'HOST': '127.0.0.1', # 'db'
+        'PORT': 5555,
     }
 }
 

@@ -13,10 +13,12 @@ def b64_encode(s):
     return b64.urlsafe_b64encode(encoded_json_data).strip(b'=')
 
 def b64_decode(s):
-    pad = b'=' * (-len(s) % 4)
-    pad_decoded = pad.decode("utf-8")
-    data = b64.urlsafe_b64decode(s + pad_decoded)
-    return data.decode("utf-8")
+    if s is not None:
+        pad = b'=' * (-len(s) % 4)
+        pad_decoded = pad.decode("utf-8")
+        data = b64.urlsafe_b64decode(s + pad_decoded)
+        return data.decode("utf-8")
+    return None
 
 def set_cookie(response, key, value, days_expire=7):
     print("Set cookie is working now:",value)

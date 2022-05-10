@@ -457,11 +457,17 @@ h2 {
 
 <body class="bg-light">
     {% include "components/navbar.html" %}
-    {% if request.path == "/" %}
+    {{request.path}}
+    {% if request.path == "/" or request.path == "/articles/" %}
     {% include "pages/create_post.html" %}
     <div class="d-flex justify-content-around container-fluid bg-light mb-5">
-        {% include "components/user.html" %}
-        {% include "components/recommended_posts.html" %}
+        {% include "components/recent_activity.html" %}
+        {% if request.path == "/articles/" %}
+            {% block article %}
+            {% endblock %}
+        {% else %}
+            {% include "components/recommended_posts.html" %}
+        {% endif %}
         {% include "components/recommended_users.html" %}
     </div>
     {% endif %}
@@ -469,18 +475,14 @@ h2 {
     {% endblock %}
     <script type="text/javascript" src="{% static 'js/chat/reconnecting-websocket.js' %}"></script>
     <script type="text/javascript">
-        console.log(navigator.onLine)
-        window.addEventListener("online", () => {
-            console.log("user is online")
-        })
         const pathname = window.location.pathname
-        console.log(window.location)
         let home = document.getElementById('home')
+        let article = document.getElementById('article')
         let dashboard = document.getElementById('dashboard')
         let chat = document.getElementById('chat')
         let notf = document.getElementById('notf')
         if (pathname === "/") {
-            home.style.color = 'blue';
+            home.style.color = '#007bff';
             let comments = document.querySelectorAll("#comment")
             let post_id = document.getElementById("id_post")
             comments.onclick = (e) => console.log(e.target)
@@ -492,8 +494,11 @@ h2 {
                 })
             }
         }
+        if (pathname.indexOf("article") !== -1){
+            article.style.color = '#007bff';
+        }
         if (pathname.indexOf("dashboard") !== -1) {
-            dashboard.style.color = 'blue';
+            dashboard.style.color = '#007bff';
         }
         if (pathname.indexOf("users") !== -1) {
             let postsTab = document.getElementById("posts-tab")
@@ -540,7 +545,7 @@ h2 {
             window.onload = ()=>{
                 scrollToBottom();
             }
-            chat.style.color = 'blue';
+            chat.style.color = '#007bff';
             let roomName = "{{request.user.pk}}{{user.pk}}"
             /*let xhr = new XMLHttpRequest()
             let formData = new FormData()
