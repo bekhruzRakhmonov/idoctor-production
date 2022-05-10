@@ -36,7 +36,7 @@ ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
-CSRF_TRUSTED_ORIGINS = ["https://8000-bekhruzrakhmono-idoctor-vzn6jybfk71.ws-eu34.gitpod.io"]
+CSRF_TRUSTED_ORIGINS = []
 
 INSTALLED_APPS = [
     "channels",
@@ -120,7 +120,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10024),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=90),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
@@ -151,11 +151,11 @@ SIMPLE_JWT = {
 DATABASES = {
     "default": {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'idoctor', # os.environ.get('POSTGRES_NAME')
-        'USER': 'postgres', # os.environ.get('POSTGRES_USER')
-        'PASSWORD': 'Idonotknow1@', # os.environ.get('POSTGRES_PASSWORD')
-        'HOST': '127.0.0.1', # 'db'
-        'PORT': 5555,
+        'NAME': os.environ.get('POSTGRES_NAME'), 
+        'USER': os.environ.get('POSTGRES_USER'), 
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': db, # 'db'
+        'PORT': 5432,
     }
 }
 
@@ -242,7 +242,7 @@ LOGIN_URL = "/login/"
 # LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/login/"
 
-#ATOMIC_REQUESTS = True
+# ATOMIC_REQUESTS = True
 # AUTOCOMMIT = False
 # email
 
@@ -256,11 +256,11 @@ CKEDITOR_CONFIGS = {
     },
 }
 
-DEFAULT_DOMAIN = "http://127.0.0.1:8000"
+DEFAULT_DOMAIN = os.getenv("DEFAULT_DOMAIN")
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST_USER = 'bekhruzrakhmonov1@gmail.com'
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_SSL = True
 EMAIL_PORT = 465
-EMAIL_HOST_PASSWORD = 'vtdaqzsetscbegfz'
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")

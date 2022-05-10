@@ -4,6 +4,7 @@ pgdata/
 .venv/
 ai/
 .vscode/
+migrations/
 stat.py
 consumers1.py
 logger.py
