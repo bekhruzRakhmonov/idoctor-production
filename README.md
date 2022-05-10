@@ -1,4 +1,4 @@
-# idoctor
+# iDoctor
 It is platform for doctors and their client
 
 # Installation
