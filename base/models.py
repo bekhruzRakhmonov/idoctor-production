@@ -215,7 +215,7 @@ class Post(models.Model):
     photo = models.ImageField(upload_to='posts/images/',blank=True,null=True)
     video = models.FileField(upload_to='posts/videos/',validators=[FileExtensionValidator(allowed_extensions=['MOV','avi','mp4','webm','mkv'])],blank=True,null=True)
     pub_date = models.DateTimeField(auto_now_add=True,null=True)
-    likes = models.ManyToManyField("Like",related_name="post_likes")
+    likes = models.ManyToManyField("Like",related_name="post_likes",blank=True)
 
     def __str__(self):
         return f"{self.text}" or f"{self.photo}"
