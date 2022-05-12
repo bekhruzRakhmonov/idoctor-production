@@ -23,7 +23,7 @@ def handle_post(sender,**kwargs):
     if follower_count > 0:
         followers = Follower.objects.filter(user=instance.owner).values()
         for follower in followers:
-            to_user = User.objects.get(pk=follower["follower_id"])
+            to_user = User.objects.get(pk=follower["user_id"])
             obj,created = Notification.objects.get_or_create(from_user=instance.owner,to_user=to_user,notf_post=instance,notf_type="post")
 
 @receiver(post_save,sender=Article)
