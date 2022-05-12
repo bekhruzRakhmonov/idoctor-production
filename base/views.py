@@ -133,7 +133,7 @@ class EditPostView(UpdateView):
     template_name = "pages/edit_post.html"
     context_object_name = "form"
     pk_url_kwarg = "post"
-    success_url = reverse_lazy("main")
+    success_url = reverse_lazy("base:main")
 
     def get_object(self):
         obj = super().get_object()
