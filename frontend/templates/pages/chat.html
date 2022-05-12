@@ -310,7 +310,7 @@
                       <p>
                         {% if message.messages.last.outgoing == request.user %}
                             You: {{message.messages.last}}
-                        {% elif message.messages.last.outgoing == mesage.outgoing %}
+                        {% else %}
                            {{message.messages.last.outgoing.name}}: {{message.messages.last}} 
                         {% endif %}
                       </p>
