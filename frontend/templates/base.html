@@ -457,7 +457,6 @@ h2 {
 
 <body class="bg-light">
     {% include "components/navbar.html" %}
-    {{request.path}}
     {% if request.path == "/" or request.path == "/articles/" %}
     {% include "pages/create_post.html" %}
     <div class="d-flex justify-content-around container-fluid bg-light mb-5">
