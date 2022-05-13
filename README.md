@@ -8,7 +8,7 @@ It is platform for doctors and their client. This platform helps them to interac
 
 
 #### Dashboard
-![image](https://user-images.githubusercontent.com/85542200/168151140-5b1dae81-0fed-430f-8a9b-8146d3a19e0c.png)
+![image](https://user-images.githubusercontent.com/85542200/168267870-9daecbb1-e8a5-4bfa-a00b-b90137cee702.png)
 
 #### Chat
 ![image](https://user-images.githubusercontent.com/85542200/168152037-282ed411-5f2c-4386-86af-22c9278bc618.png)
