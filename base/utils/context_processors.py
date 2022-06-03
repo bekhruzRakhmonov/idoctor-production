@@ -5,21 +5,6 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-month = {
-	"01": "January",
-	"02": "February",
-	"03": "March",
-	"04": "April",
-	"05": "May",
-	"06": "June",
-	"07": "July",
-	"08": "August",
-	"09": "September",
-	"10": "October",
-	"11": "November",
-	"12": "December"
-}
-
 def custom_context_processors(request):
 	likes = Like.objects.all()
 	date_time = str(datetime.datetime.now())[:10]
