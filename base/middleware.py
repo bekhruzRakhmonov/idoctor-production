@@ -59,7 +59,6 @@ class AnonUserMiddleware:
             else:
                 decoded_data = b64_decode(anon_user_data)
                 if decoded_data is not None:
-                    print("Decoded data: ",decoded_data)
                     anon_user_id = int(decoded_data[7:9])
                     anon_user = self.get_anon_user_by_id(anon_user_id)
                     if anon_user is None:
