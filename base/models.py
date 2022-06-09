@@ -114,6 +114,10 @@ class AnonUser(models.Model):
         return True
     
     @property
+    def is_staff(self):
+        return False
+    
+    @property
     def is_active(self):
         return True
 
