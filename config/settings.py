@@ -99,7 +99,7 @@ CHANNEL_LAYERS = {
 
 # cors headers
 # CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = ["https://idoctor.com/","https://www.idoctor.com/"]
+#CORS_ALLOWED_ORIGINS = ["https://idoctor.com/","https://www.idoctor.com/"]
 
 # rest_framework
 
