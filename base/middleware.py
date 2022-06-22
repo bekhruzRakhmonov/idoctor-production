@@ -1,6 +1,5 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.contrib import auth
-from django.urls import reverse_lazy
 from django.utils.functional import SimpleLazyObject
 from .models import AnonUser
 from django.contrib.auth.models import AnonymousUser
