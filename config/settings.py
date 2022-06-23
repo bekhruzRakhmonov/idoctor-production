@@ -141,10 +141,10 @@ SIMPLE_JWT = {
 DATABASES = {
     "default": {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'idoctor', #os.environ.get('POSTGRES_NAME'),
-        'USER': 'postgres', # os.environ.get('POSTGRES_USER'),
-        'PASSWORD': 'idonotknow', #os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': 'localhost',#os.environ.get('POSTGRES_HOST'), # 'db'
+        'NAME': os.environ.get('POSTGRES_NAME'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': os.environ.get('POSTGRES_HOST'), # 'db'
         'PORT': 5432,
     }
 }
