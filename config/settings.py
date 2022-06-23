@@ -20,7 +20,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["54.146.133.189","idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com"]
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
