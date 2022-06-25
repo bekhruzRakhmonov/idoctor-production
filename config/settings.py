@@ -20,11 +20,11 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["34.203.130.178"]
+ALLOWED_HOSTS = ["34.203.130.178","54.85.174.131"]
 
 # Application definition
 
-CSRF_TRUSTED_ORIGINS = []
+#CSRF_TRUSTED_ORIGINS = []
 
 INSTALLED_APPS = [
     "channels",
