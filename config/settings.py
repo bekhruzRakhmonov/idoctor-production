@@ -18,9 +18,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["172.31.46.34","54.85.174.131","34.236.215.194","https://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com/","*"]
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
