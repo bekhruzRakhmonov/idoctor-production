@@ -20,7 +20,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["34.203.130.178","localhost","127.0.0.1","54.85.174.131","doctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com","*","172-31-91-201","192.168.1.1","0.0.0.0"]
+ALLOWED_HOSTS = ["34.203.130.178","localhost","127.0.0.1","54.85.174.131","doctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com","*","172.31.91.201","192.168.1.1","0.0.0.0"]
 
 # Application definition
 
