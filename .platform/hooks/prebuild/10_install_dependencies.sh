@@ -1,3 +1,3 @@
 #!/usr/bin/sh
 
-sudo apt install python3-dev libpq-dev
+sudo apt-get install python3-dev libpq-dev
