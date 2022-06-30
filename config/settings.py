@@ -182,9 +182,9 @@ USE_TZ = True
 # crispy
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
-STATIC_URL = "static/"
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend/static")]
-STATIC_ROOT = "/var/www/idoctor/static/"
+#STATIC_URL = "static/"
+#STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend/static")]
+#STATIC_ROOT = "/var/www/idoctor/static/"
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
 """STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
