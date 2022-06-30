@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     # "fontawesomefree",
     "ckeditor",
-    "compressor",
+    # "compressor",
 ]
 
 AUTH_USER_MODEL = "base.User"
@@ -185,8 +185,8 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 STATIC_URL = "static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend/static")]
 STATIC_ROOT = "/var/www/idoctor/static/"
-#STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
-STATICFILES_FINDERS = (
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+"""STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
     # other finders..
@@ -196,7 +196,7 @@ STATICFILES_FINDERS = (
 # compressor
 
 COMPRESS_ENABLED = True
-
+"""
 # media
 
 #MEDIA_ROOT = os.path.join(BASE_DIR, "media")
