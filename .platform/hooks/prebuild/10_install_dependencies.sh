@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sudo service postgresql start
+service postgresql-14.4.service restart
