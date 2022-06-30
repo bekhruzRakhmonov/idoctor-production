@@ -84,7 +84,7 @@ class User(AbstractBaseUser,PermissionsMixin):
 
 class AnonUser(models.Model):
     username = models.CharField(max_length=255,null=True,blank=True,unique=True)
-    ip = models.GenericIPAddressField()
+    ip = models.CharField(max_length=50,null=True) #models.GenericIPAddressField()
     date_joined = models.DateTimeField(auto_now_add=True)
 
     @classmethod
