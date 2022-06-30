@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     # "fontawesomefree",
     "ckeditor",
-    #"compressor",
+    "compressor",
 ]
 
 AUTH_USER_MODEL = "base.User"
