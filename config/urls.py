@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
+import os
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,6 +29,11 @@ urlpatterns = [
 handler403 = "base.errors.error_403"
 handler404 = "base.errors.error_404"
 handler500 = "base.errors.error_500"
+
+if os.path.exists(os.path.join(os.getcwd(),"../media")):
+    pass
+else:
+    os.makedirs("../media")
 
 urlpatterns += static(settings.MEDIA_URL,
                           document_root=settings.MEDIA_ROOT)
