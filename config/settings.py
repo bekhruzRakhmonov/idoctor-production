@@ -186,16 +186,16 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend/static")]
 STATIC_ROOT = "/var/www/idoctor/static/"
 #STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
-"""STATICFILES_FINDERS = (
+STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
     # other finders..
     "compressor.finders.CompressorFinder",
-)"""
+)
 
 # compressor
 
-#COMPRESS_ENABLED = True
+COMPRESS_ENABLED = True
 
 # media
 
