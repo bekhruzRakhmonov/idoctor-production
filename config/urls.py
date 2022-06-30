@@ -29,7 +29,8 @@ handler403 = "base.errors.error_403"
 handler404 = "base.errors.error_404"
 handler500 = "base.errors.error_500"
 
-urlpatterns += static(settings.MEDIA_URL,
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,
                           document_root=settings.MEDIA_ROOT)
-urlpatterns += static(settings.STATIC_URL,
+    urlpatterns += static(settings.STATIC_URL,
                           document_root=settings.STATIC_ROOT)
