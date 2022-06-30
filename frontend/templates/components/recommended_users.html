@@ -7,7 +7,7 @@
             {% if user.email != request.user.email and request|filter_user %}
                 <a href="users/{{user.name|slugify}}/{{user.pk}}/">
                 <div class="card" style="width: 15rem;">
-                    <img class="custom-card-img-top" src="media/{{user.image}}" alt="Card image cap" >
+                    <img class="custom-card-img-top" src="{{user.image.url}}" alt="Card image cap" >
                     <div class="card-body">
                         <h5 class="card-title">{{user.name}}</h5>
                         <p class="card-text">{{user.bio|truncate_bio}}...</p>
