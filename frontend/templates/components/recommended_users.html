@@ -7,7 +7,13 @@
             {% if user.email != request.user.email and request|filter_user %}
                 <a href="users/{{user.name|slugify}}/{{user.pk}}/">
                 <div class="card" style="width: 15rem;">
-                    <img class="custom-card-img-top" src="{{user.image.url}}" alt="Card image cap" >
+                    <img class="custom-card-img-top" src="{{user.image.url}}", margin-top: 10px;
+		        margin-left: 80px;
+			    object-fit: cover;
+			        border: 0.1px solid rgb(252, 247, 247);
+				    width: 80px;
+				        height: 80px;
+					    border-radius: 50%; alt="Card image cap" >
                     <div class="card-body">
                         <h5 class="card-title">{{user.name}}</h5>
                         <p class="card-text">{{user.bio|truncate_bio}}...</p>
