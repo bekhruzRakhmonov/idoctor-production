@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     # "fontawesomefree",
     "ckeditor",
-    "compressor",
+    #"compressor",
 ]
 
 AUTH_USER_MODEL = "base.User"
@@ -195,7 +195,7 @@ STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
 
 # compressor
 
-COMPRESS_ENABLED = True
+#COMPRESS_ENABLED = True
 
 # media
 
