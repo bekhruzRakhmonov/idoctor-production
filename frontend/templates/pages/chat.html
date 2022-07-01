@@ -296,7 +296,7 @@
                   <div class="d-flex bd-highlight">
                     <div class="img_cont">
                       <img
-                        src="/media/{{message.outgoing.image}}"
+                        src="{{message.outgoing.image.url}}"
                         class="rounded-circle user_img"
                         style="object-fit: cover;"
                       />
@@ -325,7 +325,7 @@
                   <div class="d-flex bd-highlight">
                     <div class="img_cont">
                       <img
-                        src="/media/{{message.incoming.image}}"
+                        src="{{message.incoming.image.url}}"
                         class="rounded-circle user_img"
                         style="object-fit: cover;"
                       />
@@ -365,7 +365,7 @@
 
                 <div class="img_cont">
                   <img
-                    src="/media/{{user.image}}"
+                    src="{{user.image.url}}"
                     class="rounded-circle user_img"
                     style="object-fit: cover;"
                   />
@@ -403,7 +403,7 @@
                 </div>
                 <div class="img_cont_msg">
                   <img
-                    src="/media/{{request.user.image}}"
+                    src="{{request.user.image.url}}"
                     class="rounded-circle user_img_msg"
                     style="object-fit:cover;"
                   />
@@ -413,7 +413,7 @@
               <div class="d-flex justify-content-start mb-4">
                 <div class="img_cont_msg">
                   <img
-                    src="/media/{{user.image}}"
+                    src="{{user.image.url}}"
                     class="rounded-circle user_img_msg"
                     style="object-fit: cover;"
                   />
