@@ -571,7 +571,7 @@ h2 {
 
             
 
-            let chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
+            let chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/${roomName}/`);
             console.log(chatSocket)
 
             let currentStatus = false
