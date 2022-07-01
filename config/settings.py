@@ -21,7 +21,7 @@ ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
-#CSRF_TRUSTED_ORIGINS = []
+CSRF_TRUSTED_ORIGINS = [".elasticbeanstalk.com"]
 
 INSTALLED_APPS = [
     "channels",
@@ -96,7 +96,7 @@ CHANNEL_LAYERS = {
 
 # cors headers
 # CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOWED_ORIGINS = ["https://idoctor.com/","https://www.idoctor.com/"]
+CORS_ALLOWED_ORIGINS = [".elasticbeanstalk.com"]
 
 # rest_framework
 
