@@ -182,7 +182,7 @@ USE_TZ = True
 # crispy
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
-STATIC_URL = "https://idoctorbucket.s3.us-west-2.amazonaws.com/static"
+STATIC_URL = "https://idoctorbucket.s3.us-west-2.amazonaws.com/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend/static")]
 #STATIC_ROOT = "/var/www/idoctor/static/"
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
