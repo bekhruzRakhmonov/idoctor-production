@@ -4,7 +4,7 @@ import datetime
 def custom_context_processors(request):
 	likes = Like.objects.all()
 	date_time = str(datetime.datetime.now())[:10]
-    media_url = "https://idoctorbucket.s3.amazonaws.com/"
+    #media_url = "https://idoctorbucket.s3.amazonaws.com/"
 	if not request.user.is_anonymous and not request.user.is_anon:
 		notifications = Notification.objects.filter(to_user__exact=request.user)
 		notf_count = Notification.get_count(to_user=request.user)
