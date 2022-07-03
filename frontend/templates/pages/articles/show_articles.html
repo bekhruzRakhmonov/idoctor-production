@@ -6,15 +6,17 @@
 		      <br>
 		            <br>
 			          <br>
-				  	<div>
+				  	<div style="width: 500px;">
 								{% if articles|length != 0 %}
 											{% for article in articles %}
 															<a href="{% url 'base:article-detail' article.pk %}"><article>{{article.headline}}</article></a>
-																		{% endfor %}
-																				{% else %}
-																							<h3 style="margin-left: 80px;">No articles yet</h3>
-																									{% endif %}
-																										</div>
+																			<div>
+																									{{article.body|safe|truncatechars:400}}
+																													</div>
+																																{% endfor %}
+																																		{% else %}
+																																					<h3 style="margin-left: 80px;">No articles yet</h3>
+																																							{% endif %}
+																																								</div>
 </div>
 {% endblock %}
-
