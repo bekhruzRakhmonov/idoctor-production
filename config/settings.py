@@ -17,11 +17,11 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [".elasticbeanstalk.com"]
 
 # Application definition
 
-CSRF_TRUSTED_ORIGINS = [".elasticbeanstalk.com"]
+CSRF_TRUSTED_ORIGINS = ["http://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com/"]
 
 INSTALLED_APPS = [
     "channels",
