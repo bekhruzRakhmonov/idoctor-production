@@ -644,6 +644,12 @@ class Register(CreateView):
     form_class = UserCreationForm
     template_name = "auth/register.html"
     success_url = "/login"
+    
+    def get(self,request):
+        if request.user.is_authenticated:
+            messages.error(request,"To register you should logout.")
+            return redirect("base:main")
+        return super().get(request)
 
     def form_valid(self, form):
         if form.is_valid():
@@ -655,9 +661,12 @@ class Register(CreateView):
 
 class Login(View):
     def get(self, request, *args, **kwargs):
-        context = {}
-        context["form"] = UserLoginForm
-        return render(request, "auth/login.html", context)
+        if not request.user.is_authenticated:
+            context = {}
+            context["form"] = UserLoginForm
+            return render(request, "auth/login.html", context)
+        messages.error(request,"To login you should logout.")
+        return redirect("base:main")
 
     def post(self, request, *args, **kwargs):
         form = UserLoginForm(request.POST)

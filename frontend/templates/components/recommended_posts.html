@@ -2,6 +2,16 @@
 {% load custom_tags %}
 
 <div style="width: 480px;">
+  {% if messages %}
+      {% for message in messages %}
+            {% if message.level == 30 %}
+	            <p style="color: red;">{{ message }}<a href="{% url 'base:auto-anonuser-login' %}"></a></p>
+		            <p> If you want auto registration <a href="{% url 'base:auto-anonuser-login' %}">click</a></p>
+			          {% elif message.level == 40 %}
+								         <p style="color: red;">{{ message }}<a href="{% url 'base:auto-anonuser-login' %}"></a></p>
+									       {% endif %}
+									           {% endfor %}
+										     {% endif %}
   {% if request.user.is_authenticated %}
   <div
     style="display:flex;flex-direction: row; margin-top: 5px; background-color: white;margin-top: 15px; height: 70px; align-items: center; border-radius: 5px; border:0px solid black;min-width: 1.25rem;">
