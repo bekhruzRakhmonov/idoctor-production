@@ -1,7 +1,20 @@
 {% extends "base.html" %}
 
 {% block article %}
-	{% for article in articles %}
-		<a href="{% url 'base:article-detail' article.pk %}"><article>{{article.headline}}</article></a>
-	{% endfor %}
+<div>
+		<a href="{% url 'base:create-article' %}" style="text-decoration: none;"><input type="text" class="form-control" placeholder="Write article..." style="width:400px;margin-left: 20px;margin-top: 10px;" /></a>
+		      <br>
+		            <br>
+			          <br>
+				  	<div>
+								{% if articles|length != 0 %}
+											{% for article in articles %}
+															<a href="{% url 'base:article-detail' article.pk %}"><article>{{article.headline}}</article></a>
+																		{% endfor %}
+																				{% else %}
+																							<h3 style="margin-left: 80px;">No articles yet</h3>
+																									{% endif %}
+																										</div>
+</div>
 {% endblock %}
+

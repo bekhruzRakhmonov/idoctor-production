@@ -126,7 +126,6 @@ class PostCommentForm(forms.ModelForm):
 class CreateArticleForm(forms.ModelForm):
     class Meta:
         model = Article
-        exclude = ["author", "date", "views_count", "likes_count"]
-
+        fields = ["headline","body"]
 class AppointmentForm(forms.Form):
     reason = forms.CharField(label="Reason",widget=forms.Textarea(),max_length=2048)
