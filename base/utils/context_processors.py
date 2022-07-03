@@ -13,4 +13,4 @@ def custom_context_processors(request):
 		notifications = Notification.objects.filter(to_anon_user__exact=request.user)
 		notf_count = Notification.get_count(to_anon_user=request.user)
 		return {"likes":likes,"notf_count":notf_count,"notifications":notifications}
-    return {"likes":likes,"date_time":date_time,"media_url":media_url}
+    return {"likes":likes,"date_time":date_time}
