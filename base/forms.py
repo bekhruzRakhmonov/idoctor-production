@@ -127,5 +127,6 @@ class CreateArticleForm(forms.ModelForm):
     class Meta:
         model = Article
         fields = ["headline","body"]
+
 class AppointmentForm(forms.Form):
-    reason = forms.CharField(label="Reason",widget=forms.Textarea(),max_length=2048)
+    reason = forms.CharField(label="Reason",widget=forms.Textarea(attrs={"placeholder":"Write about your ache",}),max_length=2048)
