@@ -96,7 +96,7 @@ CHANNEL_LAYERS = {
 
 # cors headers
 # CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [".elasticbeanstalk.com"]
+CORS_ALLOWED_ORIGINS = ["http://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com"]
 
 # rest_framework
 
