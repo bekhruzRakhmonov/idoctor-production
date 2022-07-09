@@ -5,8 +5,6 @@ from django.utils.text import slugify
 from urllib.parse import quote,unquote, quote_plus
 import re
 
-print(quote('query sdkjsdksdk dksndk'))
-
 app_name = "base"
 
 urlpatterns = [

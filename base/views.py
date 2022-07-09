@@ -786,13 +786,27 @@ class MakeAppointmentView(View,ContextMixin):
         return render(request,"pages/appointment.html",context)
 
 # To save saved_messages
-class SavedMessagesView(View):
+class SavedMessagesView(ListView):
+    model = SavedMessages
+    template_name = "pages/saved_messages.html"
+    context_object_name = "saved_messages"
+    paginate_by = 2
+
+    def get_context_data(self,**kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_anon:
+            context["saved_messages"] = SavedMessages.objects.filter(anon_user__exact=self.request.user).order_by("-date")
+        else:
+            context["saved_messages"] = SavedMessages.objects.filter(user__exact=self.request.user).order_by("-date")
+        return context    
+
+class SavedMessagesDetailAndCreateView(View):
     def get(self,request,message_type,message_id,*args,**kwargs):
         #match message_type:
         if message_type == "post":
             self.create_post_message(request,message_id)
         elif message_type == "article":
-                self.create_article_message(request,message_id)
+            self.create_article_message(request,message_id)
 
         return redirect("base:main")
 
@@ -807,7 +821,7 @@ class SavedMessagesView(View):
         if request.user.is_authenticated:
             saved_message,created = SavedMessages.objects.get_or_create(user=request.user)
             if not created:
-                saved_message.posts.remove(post)
+                saved_message.posts.add(post)
             else:
                 saved_message.save()
                 saved_message.posts.add(post)
@@ -815,7 +829,7 @@ class SavedMessagesView(View):
         elif request.user.is_anon:
             saved_message,created = SavedMessages.objects.get_or_create(anon_user=request.user)
             if not created:
-                saved_message.posts.remove(post)
+                saved_message.posts.add(post)
             else:
                 saved_message.save()
                 saved_message.posts.add(post)
@@ -826,12 +840,12 @@ class SavedMessagesView(View):
         except Article.DoesNotExist:
             raise Http404("Article not found.")
 
-    def create_article_message(Self,request,article_id):
+    def create_article_message(self,request,article_id):
         article = self.get_article(article_id)
         if request.user.is_authenticated:
             saved_message,created = SavedMessages.objects.get_or_create(user=request.user)
             if not created:
-                saved_message.articles.remove(article)
+                saved_message.articles.add(article)
             else:
                 saved_message.save()
                 saved_message.articles.add(article)
@@ -839,7 +853,7 @@ class SavedMessagesView(View):
         elif request.user.is_anon:
             saved_message,created = SavedMessages.objects.get_or_create(anon_user=request.user)
             if not created:
-                saved_message.articles.remove(article)
+                saved_message.articles.add(article)
             else:
                 saved_message.save()
                 saved_message.articles.add(article)
