@@ -35,16 +35,6 @@ import logging
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-# https://support.lenovo.com/uz/en/solutions/ht505250-how-to-reduce-or-expand-system-partition-c-drive-size-in-windows
-
-to_be_decoded = "VGhpcyBpcyBHZWVrc0ZvckdlZWtzIDQ1NDU0NSAjICQlNjc4KiZeQCE="
-decoded = base64.b64decode(bytes(to_be_decoded, 'utf-8'))
-print(decoded.decode("utf-8"))
-
-print("[THREADING ACTIVE COUNT]",threading.active_count())
-print("[CURRENT THREAD]",threading.current_thread())
-print(threading.get_ident())
-print(threading.get_native_id())
 
 def get_cookie(request,response,ip):
     anon_user_data = request.COOKIES.get("data",None)
@@ -58,6 +48,14 @@ def get_cookie(request,response,ip):
         set_cookie(response,key="data",value=value,days_expire=30)
         return
     return None
+
+def create_anon_user(ip: str,response: redirect):
+    anon_user = AnonUser.create_user(ip=ip)
+
+    obj = AnonUser.objects.filter(id__exact=anon_user.id).values()
+    value = str(obj[0])
+    set_cookie(response,key="data",value=value,days_expire=30)
+    return anon_user
 
 def get_client_ip(request):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -436,7 +434,7 @@ class LikeArticleView(View):
             response = redirect(redirect_url)
             article = Article.objects.get(pk=pk)
             ip = self.get_client_ip()
-            get_cookie(request,response,ip)
+            # get_cookie(request,response,ip)
 
             try:
                 if request.user.is_authenticated:
@@ -448,7 +446,7 @@ class LikeArticleView(View):
                     article.likes.remove(like)
                     like.delete()
                 else:
-                    messages.info(request,"You should login as doctor or client")
+                    messages.warning(request,"You should login as doctor or client")
             except Like.DoesNotExist:
                 if request.user.is_authenticated:
                     like = Like.objects.create(user=request.user,like=True)
@@ -482,7 +480,9 @@ class LikePostView(View):
             response = redirect(redirect_url)
             post_id = kwargs["post_id"]
             ip = self.get_client_ip()
-            get_cookie(request,response,ip)
+            
+            # get_cookie(request,response,ip)
+            
             post = self.get_post(post_id)
             try:
                 if request.user.is_authenticated:
@@ -509,8 +509,9 @@ class LikePostView(View):
                     like = Like.objects.create(anon_user=request.user,like=True)
                     post.likes.add(like)
                 else:
-                    like = Like.objects.create(anon_user=request.user,like=True)
-                    post.likes.add(like)
+                    messages.warning(request,"You should login as doctor or client")
+                    #like = Like.objects.create(anon_user=request.user,like=True)
+                    #post.likes.add(like)
 
             return response
         raise PermissionDenied("Invalid url.")
@@ -873,3 +874,14 @@ class UserPasswordResetConfirmView(PasswordResetConfirmView):
 
 class UserPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = "auth/password_reset_complete.html"
+
+def login_as_ordinary_user(request):
+    path = request.META.get('HTTP_REFERER')
+    response = redirect(path)
+
+    user_ip = get_client_ip(request)
+
+    anon_user = create_anon_user(user_ip,response)
+
+    return response
+

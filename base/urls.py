@@ -36,6 +36,9 @@ urlpatterns = [
 	path('post-delete/<uuid:post><str:user_id>/',views.DeletePostView.as_view(),name="delete-post"),
 	path('posts/post-<uuid:post_id>/',views.ExplorePostView.as_view(),name="explore-post"),
 
+	# anon user
+	path('auto-login/anon-user/',views.login_as_ordinary_user,name="auto-anonuser-login"),
+
 	# user
 	path('users/<str:username>/<str:user_id>/',views.UserProfileShowcaseView.as_view(),name="user-profile-showcase"),
 	path('follow/<str:name>/<str:user_id>/',views.FollowView.as_view(),name="follow"),
@@ -53,7 +56,6 @@ urlpatterns = [
  	path('live-stream/<user_id>/',views.LiveStreamView.as_view(),name="live-stream"),
 
 	# saved messages
-	path('saved-message/<str:message_type>/<str:message_id>/',views.SavedMessagesView.as_view(),name="saved-messages"),
+	path('saved-messages/',views.SavedMessagesView.as_view(),name="saved-messages"),
+	path('saved-message/<str:message_type>/<str:message_id>/',views.SavedMessagesDetailAndCreateView.as_view(),name="saved-messages-detail-create"),
 ]
-
-# C:\Users\Admin\AppData\Local\Programs\Python\Python39\Lib\site-packages\django\contrib\auth

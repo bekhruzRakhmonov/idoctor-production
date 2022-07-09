@@ -6,7 +6,7 @@
       {% for message in messages %}
             {% if message.level == 30 %}
 	            <p style="color: red;">{{ message }}<a href="{% url 'base:auto-anonuser-login' %}"></a></p>
-		            <p> If you want auto registration <a href="{% url 'base:auto-anonuser-login' %}">click</a></p>
+		            <p> Click to login as client <a href="{% url 'base:auto-anonuser-login' %}">login.</a></p>
 			          {% elif message.level == 40 %}
 								         <p style="color: red;">{{ message }}<a href="{% url 'base:auto-anonuser-login' %}"></a></p>
 									       {% endif %}
