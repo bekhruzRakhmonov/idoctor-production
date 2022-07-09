@@ -788,7 +788,7 @@ class MakeAppointmentView(View,ContextMixin):
 # To save saved_messages
 class SavedMessagesView(ListView):
     model = SavedMessages
-    template_name = "pages/saved_messages.html"
+    template_name = "pages/collections.html"
     context_object_name = "saved_messages"
     paginate_by = 2
 
