@@ -1,3 +1,5 @@
+{% load static %}
+
 <nav class="navbar navbar-expand-md bg-white navbar-dark" style="justify-content: space-between;">
     <a class="navbar-brand" style="color:black;" href="#">iDoctor</a>
     <form method="get" action="{% url 'base:search' %}">
@@ -62,8 +64,15 @@
                         {% for notf in notifications %}
                         <li style="display: flex;">
                             <div class="col-md-3 col-sm-3 col-xs-3">
-                                <div class="notify-img"><img src="{{notf.from_user.image.url}}" alt=""
-                                        style="width: 50px;height: 50px;object-fit: cover;"></div>
+                                <div class="notify-img">
+                                    {% if notf.from_user is not None %}
+                                        <img src="{{notf.from_user.image.url}}" alt=""
+                                        style="width: 50px;height: 50px;object-fit: cover;">
+                                    {% else %}
+                                        <img src="{% static 'images/anon_user.png' %}" alt=""
+                                        style="width: 50px;height: 50px;object-fit: cover;">
+                                    {% endif %}
+                                </div>
                             </div>
                             <div class="col-md-9 col-sm-9 col-xs-9 pd-l0">
                                 <a href="">
@@ -120,7 +129,7 @@
         </div>
         <div class="user-details" style="background-color: wheat; border-radius: 15px; cursor: pointer;">
             <img class="user-pic" style="width:40px;height: 40px;border-radius: 50%; object-fit: cover;"
-                src="{{request.user.image.url}}">
+                src="/media/{{request.user.image}}">
             <span class="mr-5">{{request.user.name}}</span>
         </div>
         <div class="dropdown">
@@ -130,7 +139,7 @@
             <div class="dropdown-menu dropdown-menu-right">
                 <span class="dropdown-item">{{request.user.name}}</span>
                 <a class="dropdown-item" href="#">Settings</a>
-                <a class="dropdown-item" href="#">Link 2</a>
+                <a class="dropdown-item" href="{% url 'base:saved-messages' %}">Saved Messages</a>
                 <a class="dropdown-item" href="{% url 'base:logout' %}">Log Out</a>
             </div>
         </div>
@@ -138,8 +147,11 @@
         <div>
             <a class="mr-5" id="home" href="/" style="color:black;"><i class="fas fa-home"
                     style="font-size:26px;"></i></a>
-            <a class="mr-5" id="home" href="/" style="color:black;"><i class="fa fa-users" style="font-size:26px;"></i></a>
+
             <a class="mr-5" id="article" href="{% url 'base:articles' %}" style="color:black;"><i class="fas fa-newspaper" style="font-size:26px;"></i></a>
+
+            <a class="mr-5" id="home" href="/" style="color:black;"><i class="fa fa-users" style="font-size:26px;"></i></a>
+        
             <a class="mr-5" id="chat" href="/chat/" style="color:black;"><i class="fas fa-comment"
                     style="font-size:26px;"></i></a>
             <a class="mr-5" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="notf"
@@ -219,11 +231,11 @@
                 </ul>
             </div>
         </div>
-        <div class="user-details" style="background-color: wheat; border-radius: 15px; cursor: pointer;">
+        <!-- <div class="user-details" style="background-color: wheat; border-radius: 15px; cursor: pointer;">
             <img class="user-pic" style="width:40px;height: 40px;border-radius: 50%; object-fit: cover;"
                 src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png">
             <span class="mr-5">{{request.user.username}}</span>
-        </div>
+        </div> -->
         <div class="dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
                 <i class="fas fa-user"></i>
@@ -231,7 +243,7 @@
             <div class="dropdown-menu dropdown-menu-right">
                 <span class="dropdown-item">{{request.user.name}}</span>
                 <a class="dropdown-item" href="#">Settings</a>
-                <a class="dropdown-item" href="#">Link 2</a>
+                <a class="dropdown-item" href="{% url 'base:saved-messages' %}">Saved Messages</a>
                 <a class="dropdown-item" href="{% url 'base:logout' %}">Log Out</a>
             </div>
         </div>
@@ -241,6 +253,9 @@
             <div>
                 <a class="mr-5" id="home" href="#" style="color:black;"><i class="fas fa-home"
                         style="font-size:26px;"></i></a>
+                        
+                <a class="mr-5" id="article" href="{% url 'base:articles' %}" style="color:black;"><i class="fas fa-newspaper" style="font-size:26px;"></i></a>
+
                 <a class="mr-5" id="chat" href="{% url 'base:chat-room' %}" style="color:black;"><i
                         class="fas fa-comment" style="font-size:26px;"></i></a>
                 <a class="mr-5" id="notf" href="#" style="color:black;"><i class="fas fa-bell"
