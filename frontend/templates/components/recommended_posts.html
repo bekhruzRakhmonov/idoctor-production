@@ -1,17 +1,18 @@
 {% load crispy_forms_tags %}
 {% load custom_tags %}
 
+
 <div style="width: 480px;">
   {% if messages %}
-      {% for message in messages %}
-            {% if message.level == 30 %}
-	            <p style="color: red;">{{ message }}<a href="{% url 'base:auto-anonuser-login' %}"></a></p>
-		            <p> Click to login as client <a href="{% url 'base:auto-anonuser-login' %}">login.</a></p>
-			          {% elif message.level == 40 %}
-								         <p style="color: red;">{{ message }}<a href="{% url 'base:auto-anonuser-login' %}"></a></p>
-									       {% endif %}
-									           {% endfor %}
-										     {% endif %}
+    {% for message in messages %}
+      {% if message.level == 30 %}
+        <p style="color: red;">{{ message }}<a href="{% url 'base:auto-anonuser-login' %}"></a></p>
+        <p> If you want auto registration <a href="{% url 'base:auto-anonuser-login' %}">click</a></p>
+      {% elif message.level == 40 %}
+        <p style="color: red;">{{ message }}<a href="{% url 'base:auto-anonuser-login' %}"></a></p>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
   {% if request.user.is_authenticated %}
   <div
     style="display:flex;flex-direction: row; margin-top: 5px; background-color: white;margin-top: 15px; height: 70px; align-items: center; border-radius: 5px; border:0px solid black;min-width: 1.25rem;">
@@ -66,7 +67,7 @@
             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-left: -140px;">
               <a class="dropdown-item" href="{% url 'base:edit-post' post.post_id request.user.pk %}"><i class="fas fa-edit"></i> Edit</a>
               <a class="dropdown-item" href="{% url 'base:delete-post' post.post_id request.user.pk %}"><i class="fas fa-trash-alt"></i> Delete</a>
-              <a class="dropdown-item" href="{% url 'base:saved-messages' 'post' post.post_id %}"><i class="far fa-bookmark"></i>  Save Post</a>
+              <a class="dropdown-item" href="{% url 'base:saved-messages-detail-create' 'post' post.post_id %}"><i class="far fa-bookmark"></i>  Save Post</a>
               <a class="dropdown-item" id="copyPostLink" style="cursor:pointer;"><i class="fas fa-link"></i> Copy link</a>
             </div>
           </div>
@@ -75,7 +76,7 @@
             <i class="fas fa-ellipsis-h" id="dropdownMenuLink" onmouseover="this.style.color='blue'" onmouseout="this.style.color='black'" style="font-size:20px;cursor: pointer;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
 
             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-left: -140px;">
-              <a class="dropdown-item" href="{% url 'base:saved-messages' 'post' post.post_id %}"><i class="far fa-bookmark"></i>  Save Post</a>
+              <a class="dropdown-item" href="{% url 'base:saved-messages-detail-create' 'post' post.post_id %}"><i class="far fa-bookmark"></i>  Save Post</a>
               <a class="dropdown-item" id="copyPostLink" style="cursor:pointer;"><i class="fas fa-link"></i> Copy link</a>
                 <input type="text" value="{{request.get_host}}/posts/post-{{post.post_id}}" id="copyPostLinkValue" style="display:none;">
             </div>
@@ -136,3 +137,4 @@
   </div>
   {% endfor %}
 </div>
+
