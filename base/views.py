@@ -496,9 +496,11 @@ class LikePostView(View):
                     post.likes.remove(like)
                     like.delete()
                 else:
-                    like = post.likes.get(anon_user=request.user,like=True)
-                    post.likes.remove(like)
-                    like.delete()
+                    messages.warning(request,"You should login as doctor or client")
+
+                    #like = post.likes.get(anon_user=request.user,like=True)
+                    #post.likes.remove(like)
+                    #like.delete()
             except Like.DoesNotExist:
                 if request.user.is_authenticated:
                     like = Like.objects.create(user=request.user,like=True)
@@ -509,9 +511,8 @@ class LikePostView(View):
                     like = Like.objects.create(anon_user=request.user,like=True)
                     post.likes.add(like)
                 else:
-                    messages.warning(request,"You should login as doctor or client")
-                    #like = Like.objects.create(anon_user=request.user,like=True)
-                    #post.likes.add(like)
+                    like = Like.objects.create(anon_user=request.user,like=True)
+                    post.likes.add(like)
 
             return response
         raise PermissionDenied("Invalid url.")
