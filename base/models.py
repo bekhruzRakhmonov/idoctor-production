@@ -361,7 +361,7 @@ class SavedMessages(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="saved_messages_user",blank=True,null=True)
     anon_user = models.ForeignKey(AnonUser, on_delete=models.CASCADE,related_name="saved_messagess_anon_user",blank=True,null=True)
     posts = models.ManyToManyField(Post,related_name="saved_message_post")
-    articles = models.ManyToManyField(Post,related_name="saved_messages_article")
+    articles = models.ManyToManyField(Article,related_name="saved_messages_article")
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
