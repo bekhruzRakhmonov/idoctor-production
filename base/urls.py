@@ -54,6 +54,6 @@ urlpatterns = [
  	path('live-stream/<user_id>/',views.LiveStreamView.as_view(),name="live-stream"),
 
 	# saved messages
-	path('saved-messages/',views.SavedMessagesView.as_view(),name="saved-messages"),
-	path('saved-message/<str:message_type>/<str:message_id>/',views.SavedMessagesDetailAndCreateView.as_view(),name="saved-messages-detail-create"),
+	path('collections/',views.SavedMessagesView.as_view(),name="saved-messages"),
+	path('collections/<str:message_type>/<str:message_id>/',views.SavedMessagesDetailAndCreateView.as_view(),name="saved-messages-detail-create"),
 ]

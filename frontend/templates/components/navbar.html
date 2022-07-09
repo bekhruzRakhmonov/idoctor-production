@@ -129,7 +129,7 @@
         </div>
         <div class="user-details" style="background-color: wheat; border-radius: 15px; cursor: pointer;">
             <img class="user-pic" style="width:40px;height: 40px;border-radius: 50%; object-fit: cover;"
-                src="/media/{{request.user.image}}">
+                src="{{request.user.image.url}}">
             <span class="mr-5">{{request.user.name}}</span>
         </div>
         <div class="dropdown">
@@ -139,7 +139,7 @@
             <div class="dropdown-menu dropdown-menu-right">
                 <span class="dropdown-item">{{request.user.name}}</span>
                 <a class="dropdown-item" href="#">Settings</a>
-                <a class="dropdown-item" href="{% url 'base:saved-messages' %}">Saved Messages</a>
+                <a class="dropdown-item" href="{% url 'base:saved-messages' %}">Collections</a>
                 <a class="dropdown-item" href="{% url 'base:logout' %}">Log Out</a>
             </div>
         </div>
@@ -243,7 +243,7 @@
             <div class="dropdown-menu dropdown-menu-right">
                 <span class="dropdown-item">{{request.user.name}}</span>
                 <a class="dropdown-item" href="#">Settings</a>
-                <a class="dropdown-item" href="{% url 'base:saved-messages' %}">Saved Messages</a>
+                <a class="dropdown-item" href="{% url 'base:saved-messages' %}">Collections</a>
                 <a class="dropdown-item" href="{% url 'base:logout' %}">Log Out</a>
             </div>
         </div>
