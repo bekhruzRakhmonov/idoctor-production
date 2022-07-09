@@ -3,7 +3,9 @@
 {% load custom_tags %}
 
 {% block content %}
-{{saved_messages}}
+	{% if saved_messages|length == 0 %}
+		<h2 style="text-align:center;margin-top:100px;">No collections yet.</h2>
+	{% endif %}
 	{% for saved_message in saved_messages %}
 		{% for article in saved_message.articles.all %}
 			<div class="container card" style="width:650px;">
