@@ -128,7 +128,7 @@
 				            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-left: -140px;">
 				              <a class="dropdown-item" href="{% url 'base:edit-post' post.post_id request.user.pk %}"><i class="fas fa-edit"></i> Edit</a>
 				              <a class="dropdown-item" href="{% url 'base:delete-post' post.post_id request.user.pk %}"><i class="fas fa-trash-alt"></i> Delete</a>
-				              <a class="dropdown-item" href="{% url 'base:saved-messages' 'post' post.post_id %}"><i class="far fa-bookmark"></i>  Save Post</a>
+				              <a class="dropdown-item" href="{% url 'base:saved-messages-detail-create' 'post' post.post_id %}"><i class="far fa-bookmark"></i>  Save Post</a>
 				              <a class="dropdown-item" id="copyPostLink" style="cursor:pointer;"><i class="fas fa-link"></i> Copy link</a>
 				            </div>
 				          </div>
