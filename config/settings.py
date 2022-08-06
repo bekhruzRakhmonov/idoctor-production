@@ -18,11 +18,11 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [".elasticbeanstalk.com"]
+ALLOWED_HOSTS = [".herokuapp.com"]
 
 # Application definition
 
-CSRF_TRUSTED_ORIGINS = ["http://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com/"]
+CSRF_TRUSTED_ORIGINS = ["https://idoctoruz.herokuapp.com/"]
 
 INSTALLED_APPS = [
     "channels",
@@ -98,8 +98,8 @@ CHANNEL_LAYERS = {
     },
 }
 # cors headers
-# CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = ["http://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com"]
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = ["http://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com"]
 
 # rest_framework
 
@@ -200,12 +200,12 @@ COMPRESS_ENABLED = True
 
 # AWS S3 Storage
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-AWS_ACCESS_KEY_ID = 'AKIAVSJGJS26KT3F2DS7'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'idoctorbucket'
-AWS_QUERYSTRING_AUTH = False
+# AWS_ACCESS_KEY_ID = 'AKIAVSJGJS26KT3F2DS7'
+# AWS_SECRET_ACCESS_KEY = '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'
+# AWS_STORAGE_BUCKET_NAME = 'idoctorbucket'
+# AWS_QUERYSTRING_AUTH = False
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
