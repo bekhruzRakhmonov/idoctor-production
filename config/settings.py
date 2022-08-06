@@ -32,8 +32,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "base.apps.BaseConfig",
-    "api.apps.ApiConfig",
+    "base",
+    "api",
     
     # external libraries
     "corsheaders",
@@ -181,7 +181,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 STATIC_URL = "https://idoctorbucket.s3.us-west-2.amazonaws.com/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend/static")]
 #STATIC_ROOT = "/var/www/idoctor/static/"
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
 """STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
