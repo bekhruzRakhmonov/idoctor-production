@@ -570,8 +570,8 @@ h2 {
             let status = document.querySelector("#status")
 
             
-
-            let chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
+            let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+            let chatSocket = new WebSocket(`${ws_scheme}://${window.location.host}/ws/chat/${roomName}/`);
             console.log(chatSocket)
 
             let currentStatus = false
