@@ -87,13 +87,14 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # asgi configuration
-ASGI_APPLICATION = "config.asgi.application"
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+    },
 }
-
 # cors headers
 # CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = ["http://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com"]
