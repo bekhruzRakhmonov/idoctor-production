@@ -348,8 +348,12 @@ class Notification(models.Model):
 class Client(models.Model):
     client = models.ForeignKey(AnonUser,on_delete=models.CASCADE,related_name="appointment_client",blank=True,null=True)
     doctor = models.ForeignKey(User,on_delete=models.CASCADE,related_name="appointment_doctor",blank=True,null=True)
+    name = models.CharField(max_length=255,null=True)
     reason = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
+    approved = models.BooleanField(default=False)
+    rejected = models.BooleanField(default=False)
+    text = models.TextField(null=True,blank=True)
 
 class Appointment(models.Model):
     doctor = models.ForeignKey(User,on_delete=models.CASCADE,related_name="appointment_user")

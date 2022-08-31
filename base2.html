@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!--<script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
+    <link href="{% static 'fontawesomefree/css/all.min.css' %}" rel="stylesheet" type="text/css">-->
     <style type="text/css">
         body {
             margin-top: 20px;
@@ -556,8 +558,20 @@ h2 {
             }
             chat.style.color = '#007bff';
             let roomName = "{{request.user.pk}}{{user.pk}}"
-
-            console.log("ROOM NAME",roomName)
+            /*let xhr = new XMLHttpRequest()
+            let formData = new FormData()
+            xhr.open("POST", "/room/", true)
+            xhr.onload = () => {
+                let response = JSON.parse(xhr.response)
+                roomName = response.room_id
+                console.log(response.room_id)
+            }
+            let data = {
+                requestUserId: "{{request.user.pk}}",
+                userId: "{{user.pk}}"
+            }
+            formData.append("data",JSON.stringify(data))
+            xhr.send(formData)*/
 
             let getMessage = document.querySelector("#message-text");
             let chatForm = document.forms["chat"];
@@ -566,9 +580,14 @@ h2 {
             let status = document.querySelector("#status")
 
             
+<<<<<<< HEAD
+            let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+            let chatSocket = new WebSocket(`${ws_scheme}://${window.location.host}/ws/chat/${roomName}/`);
+            console.log(chatSocket)
+=======
 
             let chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/${roomName}/`);
-            console.log(chatSocket)
+>>>>>>> f3f11023d977b2e11e55bfdce9b424e816b0199b
 
             let currentStatus = false
             chatSocket.onopen = (e) => {
@@ -625,7 +644,7 @@ h2 {
                         </div>
                         <div class="img_cont_msg">
                           <img
-                            src="/media/{{request.user.image}}"
+                            src="{{request.user.image.url}}"
                             class="rounded-circle user_img_msg"
                             style="object-fit:cover;"
                           />
@@ -638,7 +657,7 @@ h2 {
                         <div class="d-flex justify-content-start mb-4">
                         <div class="img_cont_msg">
                           <img
-                            src="/media/{{user.image}}"
+                            src="{{user.image.url}}"
                             class="rounded-circle user_img_msg"
                             style="object-fit: cover;"
                           />
@@ -712,8 +731,9 @@ h2 {
         })
 
     </script>
-    <script type="text/javascript" src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
-    <script type="text/javascript" src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/index.js' %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
 </body>
 
 </html>

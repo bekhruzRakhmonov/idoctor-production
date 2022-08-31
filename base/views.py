@@ -578,8 +578,6 @@ class DashboardView(LoginRequiredMixin, View, ContextMixin):
             "followers": ctx["followers"],
             "posts": ctx["posts"],
             "posts_count": ctx["posts_count"],
-            "articles": ctx["articles"],
-            "appointments": ctx["appointments"],
             "articles_count": ctx["articles_count"],
             "form":form,
         }
@@ -594,7 +592,10 @@ class DashboardView(LoginRequiredMixin, View, ContextMixin):
         context["posts_count"] = Post.get_count(self.request.user)
         context["articles"] = Article.objects.filter(author__exact=self.request.user)
         appointment = Appointment.objects.filter(doctor__exact=self.request.user).first()
-        context["appointments"] = appointment.clients.all()
+        if appointment is not None:
+            context["appointments"] = appointment.clients.all()
+        else:
+            context["appointments"] = []
         context["articles_count"] = Article.get_count(author=self.request.user)
         
         return context

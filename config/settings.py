@@ -3,7 +3,6 @@ import os
 from datetime import timedelta
 import asgiref
 import channels
-import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,19 +17,17 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-<<<<<<< HEAD
 ALLOWED_HOSTS = [".herokuapp.com"]
 
 # Application definition
 
 CSRF_TRUSTED_ORIGINS = ["https://idoctoruz.herokuapp.com/"]
-=======
+
 ALLOWED_HOSTS = ["18.133.138.104","127.0.0.1","localhost","vidoctor.uz"]
 
 # Application definition
 
 CSRF_TRUSTED_ORIGINS = ["http://18.133.138.104","https://vidoctor.uz"]
->>>>>>> f3f11023d977b2e11e55bfdce9b424e816b0199b
 
 INSTALLED_APPS = [
     "channels",
@@ -97,35 +94,20 @@ ASGI_APPLICATION = "config.asgi.application"
 WSGI_APPLICATION = "config.wsgi.application"
 
 # asgi configuration
-<<<<<<< HEAD
-=======
-ASGI_APPLICATION = "config.asgi.application"
-#CHANNEL_LAYERS = {
-#    "default": {
-#        "BACKEND": "channels.layers.InMemoryChannelLayer"
-#    }
-#}
 
->>>>>>> f3f11023d977b2e11e55bfdce9b424e816b0199b
+ASGI_APPLICATION = "config.asgi.application"
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-<<<<<<< HEAD
-            "hosts": [("localhost", 6379)],
-=======
             "hosts": [("127.0.0.1", 6379)],
->>>>>>> f3f11023d977b2e11e55bfdce9b424e816b0199b
         },
     },
 }
 # cors headers
 CORS_ALLOW_ALL_ORIGINS = True
-<<<<<<< HEAD
-# CORS_ALLOWED_ORIGINS = ["http://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com"]
-=======
 #CORS_ALLOWED_ORIGINS = ["http://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com"]
->>>>>>> f3f11023d977b2e11e55bfdce9b424e816b0199b
 
 # rest_framework
 
@@ -165,7 +147,14 @@ SIMPLE_JWT = {
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    "default": dj_database_url.config(conn_max_age=600),
+    "default": {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get('POSTGRES_NAME'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': os.environ.get('POSTGRES_HOST'), # 'db'
+        'PORT': 5432,
+    }
 }
 
 # Password validation
@@ -206,13 +195,9 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 STATIC_URL = "https://idoctor.s3.eu-west-2.amazonaws.com/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend/static")]
-<<<<<<< HEAD
-#STATIC_ROOT = "/var/www/idoctor/static/"
-# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
-=======
 STATIC_ROOT = "/var/www/idoctor/static/"
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
->>>>>>> f3f11023d977b2e11e55bfdce9b424e816b0199b
+
 """STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
@@ -231,19 +216,13 @@ MEDIA_URL = "https://idoctor.s3.eu-west-2.amazonaws.com/"
 
 # AWS S3 Storage
 
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-<<<<<<< HEAD
-# AWS_ACCESS_KEY_ID = 'AKIAVSJGJS26KT3F2DS7'
-# AWS_SECRET_ACCESS_KEY = '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'
-# AWS_STORAGE_BUCKET_NAME = 'idoctorbucket'
-# AWS_QUERYSTRING_AUTH = False
-=======
 AWS_ACCESS_KEY_ID = 'AKIA2ETB2ID7VBVMMVNI' #'AKIA2ETB2ID7367OF2U4'
 AWS_SECRET_ACCESS_KEY = '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' #'8hykLbj2s0/VvbZfJt3rCEJLntNpOR85AGdDA5YX'
 AWS_STORAGE_BUCKET_NAME = 'idoctor'
 AWS_QUERYSTRING_AUTH = False
->>>>>>> f3f11023d977b2e11e55bfdce9b424e816b0199b
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
