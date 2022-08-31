@@ -87,7 +87,7 @@ class Main(View):
             if request.user.is_authenticated:
                 notifications = Notification.objects.filter(to_user__exact=request.user).order_by("-date")
             else:
-                notifications = Notification.objects.all()
+                notifications = Notification.objects.filter(to_anon_user__exact=request.user).order_by("-date")
             post_form = CreatePostForm(request.user)
             comment_form = PostCommentForm
             context["notifications"] = notifications
@@ -100,7 +100,7 @@ class Main(View):
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         users = User.objects.all()
-        post = Post.objects.all()
+        post = Post.objects.all().order_by("-pub_date")
         comments = Comment.objects.all()
         likes = Like.objects.all()
         notifications = Notification.objects.filter(to_user__exact=request.user).order_by("-date")
@@ -131,7 +131,7 @@ class EditPostView(UpdateView):
     template_name = "pages/edit_post.html"
     context_object_name = "form"
     pk_url_kwarg = "post"
-    success_url = reverse_lazy("base:main")
+    #success_url = reverse_lazy("base:main")
 
     def get_object(self):
         obj = super().get_object()
@@ -146,7 +146,7 @@ class DeletePostView(DeleteView):
     model = Post
     template_name = "pages/posts/post_confirm_delete.html"
     pk_url_kwarg = "post"
-    success_url = reverse_lazy("main")
+    success_url = reverse_lazy("base:main")
 
     def get_object(self):
         obj = super().get_object()
@@ -361,6 +361,11 @@ class ArticleDetailView(generic.detail.DetailView):
     template_name = "pages/article_detail.html"
     context_object_name = "article"
     query_pk_and_slug = True
+    
+    def get(self,request,*args,**kwargs):
+        article = self.get_object()
+        Article.increase_views_count(pk=article.id)
+        return super().get(request,*args,**kwargs)
 
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
@@ -386,7 +391,7 @@ class EditArticleView(LoginRequiredMixin,UpdateView):
     template_name = "pages/articles/edit_article.html"
     context_object_name = "form"
     pk_url_kwarg = "pk"
-    success_url = reverse_lazy("main")
+    # success_url = reverse_lazy("base:main")
 
     def get_object(self):
         obj = super().get_object()
@@ -401,7 +406,7 @@ class DeleteArticleView(LoginRequiredMixin,DeleteView):
     model = Article
     template_name = "pages/articles/article_confirm_delete.html"
     pk_url_kwarg = "article"
-    success_url = reverse_lazy("main")
+    success_url = reverse_lazy("base:articles")
 
     def get_object(self):
         obj = super().get_object()
@@ -703,19 +708,23 @@ class FollowView(View):
                     Follower.unfollow(user=user, follower=request.user)
                 else:
                     raise FollowerError("UserDoesNotExist")
-            if request.user.is_anon:
+            elif request.user.is_anon:
                 follower = Follower.objects.get(user=user)
                 followers = follower.anon_followers.all()
                 if request.user in followers:
                     Follower.unfollow(user=user, follower=request.user)
                 else:
                     raise FollowerError("UserDoesNotExist")
+            else:
+                messages.warning(request,"You should register as doctor or client")
         except (FollowerError,Follower.DoesNotExist):
             if request.user.is_authenticated:
                 if not user == request.user:
                     Follower.follow(user=user, follower=request.user)
-            if request.user.is_anon:
+            elif request.user.is_anon:
                 Follower.follow(user=user, follower=request.user)
+            else:
+                messages.warning(request,"You should register as doctor or client")   
         return redirect(path)
 
 # Video Stream
@@ -791,7 +800,7 @@ class SavedMessagesView(ListView):
     model = SavedMessages
     template_name = "pages/collections.html"
     context_object_name = "saved_messages"
-    paginate_by = 2
+    paginate_by = 2 
 
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
@@ -809,7 +818,7 @@ class SavedMessagesDetailAndCreateView(View):
         elif message_type == "article":
             self.create_article_message(request,message_id)
 
-        return redirect("base:main")
+        return redirect("base:saved-messages")
 
     def get_post(self,post_id):
         try:

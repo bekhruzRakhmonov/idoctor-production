@@ -17,7 +17,7 @@ class TokenAnonUser:
 class OutstandingToken(models.Model):
 	id = models.BigAutoField(primary_key=True, serialize=False)
 	anon_user = models.ForeignKey(
-		settings.AUTH_ANON_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+		settings.AUTH_ANON_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
 	)
 
 	jti = models.CharField(unique=True, max_length=255)

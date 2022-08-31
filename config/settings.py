@@ -17,11 +17,11 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [".elasticbeanstalk.com"]
+ALLOWED_HOSTS = ["18.133.138.104","127.0.0.1","localhost","vidoctor.uz"]
 
 # Application definition
 
-CSRF_TRUSTED_ORIGINS = ["http://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com/"]
+CSRF_TRUSTED_ORIGINS = ["http://18.133.138.104","https://vidoctor.uz"]
 
 INSTALLED_APPS = [
     "channels",
@@ -88,15 +88,24 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # asgi configuration
 ASGI_APPLICATION = "config.asgi.application"
+#CHANNEL_LAYERS = {
+#    "default": {
+#        "BACKEND": "channels.layers.InMemoryChannelLayer"
+#    }
+#}
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
 }
 
 # cors headers
-# CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = ["http://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com"]
+CORS_ALLOW_ALL_ORIGINS = True
+#CORS_ALLOWED_ORIGINS = ["http://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com"]
 
 # rest_framework
 
@@ -182,9 +191,9 @@ USE_TZ = True
 # crispy
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
-STATIC_URL = "https://idoctorbucket.s3.us-west-2.amazonaws.com/static/"
+STATIC_URL = "https://idoctor.s3.eu-west-2.amazonaws.com/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend/static")]
-#STATIC_ROOT = "/var/www/idoctor/static/"
+STATIC_ROOT = "/var/www/idoctor/static/"
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
 """STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -199,16 +208,16 @@ COMPRESS_ENABLED = True
 """
 # media
 
-#MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-#MEDIA_URL = "media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_URL = "https://idoctor.s3.eu-west-2.amazonaws.com/"
 
 # AWS S3 Storage
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-AWS_ACCESS_KEY_ID = 'AKIAVSJGJS26KT3F2DS7'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'idoctorbucket'
+AWS_ACCESS_KEY_ID = 'AKIA2ETB2ID7VBVMMVNI' #'AKIA2ETB2ID7367OF2U4'
+AWS_SECRET_ACCESS_KEY = '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' #'8hykLbj2s0/VvbZfJt3rCEJLntNpOR85AGdDA5YX'
+AWS_STORAGE_BUCKET_NAME = 'idoctor'
 AWS_QUERYSTRING_AUTH = False
 
 # Default primary key field type
@@ -263,11 +272,11 @@ EMAIL_PORT = 465
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 # HTTPS settings
-#SESSION_COOKIE_SECURE = True
-#CSRF_COOKIE_SECURE = True
-#SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = False
 
 # HSTS settings
-#SECURE_HSTS_SECONDS = 31536000 # 1 year
-#SECURE_HSTS_PRELOAD = True
-#SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_SECONDS = 31536000 # 1 year
+SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True

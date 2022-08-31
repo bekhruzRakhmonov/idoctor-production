@@ -27,15 +27,17 @@ def handle_post(sender,**kwargs):
             obj,created = Notification.objects.get_or_create(from_user=instance.owner,to_user=to_user,notf_post=instance,notf_type="post")
 
 @receiver(post_save,sender=Article)
-def handle_post(sender,**kwargs):
+def handle_article(sender,**kwargs):
     instance = kwargs["instance"]
-    follower_count = Follower.get_count(user=instance.author)
-    if follower_count > 0:
-        followers = Follower.objects.filter(user=instance.author).values()
-        for follower in followers:
-            to_user = User.objects.get(pk=follower["follower_id"])
-            obj,created = Notification.objects.get_or_create(from_user=instance.author,to_user=to_user,notf_article=instance,notf_type="article")
+    followers_count = Follower.get_count(user=instance.author)
+    if followers_count > 0:
+        user = Follower.objects.get(user=instance.author)
+        for follower in user.followers.all():
+            obj,created = Notification.objects.get_or_create(from_user=instance.author,to_user=follower,notf_article=instance,notf_type="article")
 
+        for anon_follower in user.anon_followers.all():
+            obj,created = Notification.objects.get_or_create(from_user=instance.author,to_anon_user=anon_follower,notf_article=instance,notf_type="article")
+            
 @receiver(post_save,sender=Comment)
 def handle_comment(sender,*args,**kwargs):
     instance = kwargs["instance"]

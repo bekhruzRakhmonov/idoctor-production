@@ -74,6 +74,9 @@
                                 <li class="nav-item">
                                     <a class="nav-link" id="articles-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Articles</a>
                                 </li>
+				<li class="nav-item">
+				    <a class="nav-link" id="appointments-tab" data-toggle="tab" href="#appointments" role="tab" aria-controls="profile" aria-selected="false">Appointments</a>
+				</li>
                             </ul>
                         </div>
                     </div>
@@ -88,7 +91,7 @@
                             <span>{{user.bio}}</span>
                         </div>
                     </div>
-                    <div class="col-md-8" style="margin-top:-100px;">
+                    <div class="col-md-8" style="margin-top:-40px;" >
                         <div class="tab-content profile-tab" id="myTabContent">
                             <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="home-tab">
                                     <div class="row">
@@ -99,7 +102,7 @@
                                                 {% endif %}
                                                 <small class="text-muted">{{post.pub_date}}</small>
                                                 {% if post.photo %}
-                                                    <img src="/media/{{post.photo}}" style="max-width: 500px;max-height: 500px;">
+                                                    <img src="{{post.photo.url}}" style="max-width: 500px;max-height: 500px;">
                                                 {% endif %}
                                             </div>
                                         {% endfor %}

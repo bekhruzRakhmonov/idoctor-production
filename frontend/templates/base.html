@@ -561,8 +561,6 @@ h2 {
             formData.append("data",JSON.stringify(data))
             xhr.send(formData)*/
 
-            console.log("ROOM NAME",roomName)
-
             let getMessage = document.querySelector("#message-text");
             let chatForm = document.forms["chat"];
             let sendBtn = document.querySelector("#sendBtn");
@@ -571,8 +569,7 @@ h2 {
 
             
 
-            let chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
-            console.log(chatSocket)
+            let chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/${roomName}/`);
 
             let currentStatus = false
             chatSocket.onopen = (e) => {
@@ -629,7 +626,7 @@ h2 {
                         </div>
                         <div class="img_cont_msg">
                           <img
-                            src="/media/{{request.user.image}}"
+                            src="{{request.user.image.url}}"
                             class="rounded-circle user_img_msg"
                             style="object-fit:cover;"
                           />
@@ -642,7 +639,7 @@ h2 {
                         <div class="d-flex justify-content-start mb-4">
                         <div class="img_cont_msg">
                           <img
-                            src="/media/{{user.image}}"
+                            src="{{user.image.url}}"
                             class="rounded-circle user_img_msg"
                             style="object-fit: cover;"
                           />
