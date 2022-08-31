@@ -50,11 +50,11 @@
                         <div class="search-results-container" style="display:flex;display:flex;justify-content: space-between;align-items: flex-start;">
                             <div style="display:flex;">
                                 <div class="img-container">
-                                    <img src="/media/{{ search.image }}" style="width:60px;height:60px;object-fit: cover;border-radius: 50%;">
+                                    <img src="{{ search.image.url }}" style="width:60px;height:60px;object-fit: cover;border-radius: 50%;">
                                 </div>
                                 <div class="search-details-container" style="display:flex;margin-left: 10px;">
                                     <div class="row">
-                                        <a href="#" style="color: black;">{{search.name}}</a>
+					    <a href="/users/{{search.name}}/{{search.id}}" style="color: black;">{{search.name}}</a>
                                         <p style="width:350px;word-wrap: break-word;">{{search.bio}}</p>
                                     </div>
                                 </div>

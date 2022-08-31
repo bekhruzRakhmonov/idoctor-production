@@ -4,7 +4,7 @@
     <a class="navbar-brand" style="color:black;" href="#">iDoctor</a>
     <form method="get" action="{% url 'base:search' %}">
         <div class="search-container">
-            <input type="text" placeholder="Search.." name="q" style="padding: 6px;
+            <input type="text" placeholder="Search doctors..." name="q" style="padding: 6px;
                 margin-top: 8px;
                 font-size: 17px;
                 border: none;
@@ -66,7 +66,7 @@
                             <div class="col-md-3 col-sm-3 col-xs-3">
                                 <div class="notify-img">
                                     {% if notf.from_user is not None %}
-                                        <img src="{{notf.from_user.image.url}}" alt=""
+				    <img src="{{notf.from_user.image.url}}" alt=""
                                         style="width: 50px;height: 50px;object-fit: cover;">
                                     {% else %}
                                         <img src="{% static 'images/anon_user.png' %}" alt=""
@@ -83,7 +83,7 @@
                                     {% endif %}
                                 </a>
                                 {% if notf.notf_type == "comment" %} wrote comment to your post
-                                <a href="posts/post-{{notf.notf_comment.post.post_id}}">
+                                <a href="/posts/post-{{notf.notf_comment.post.post_id}}">
                                     {{notf.notf_comment.post}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
@@ -93,15 +93,21 @@
                                     {{notf.notf_like.post}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
+                                {% elif notf.notf_type == "like_article" %}
+                                liked to your article
+                                <a href="{% url 'base:article-detail'  notf.notf_article.id %}">
+                                    {{notf.notf_like.article.headline}}
+                                </a>
+                                <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
                                 {% elif notf.notf_type == "post" %}
-                                posted a new post
+                                published a new post
                                 <a href="posts/post-{{notf.notf_post.post_id}}">
                                     {{notf.notf_post}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
                                 {% elif notf.notf_type == "article" %}
                                 published a new article
-                                <a href="posts/post-{{notf.notf_post.post_id}}">
+				<a href="{% url 'base:article-detail'  notf.notf_article.id %}">
                                     {{notf.notf_article}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
@@ -181,7 +187,7 @@
                         {% for notf in notifications %}
                         <li style="display: flex;">
                             <div class="col-md-3 col-sm-3 col-xs-3">
-                                <div class="notify-img"><img src="/media/{{notf.from_user.image}}" alt=""
+                                <div class="notify-img"><img src="{{notf.from_user.image.url}}" alt=""
                                         style="width: 50px;height: 50px;object-fit: cover;"></div>
                             </div>
                             <div class="col-md-9 col-sm-9 col-xs-9 pd-l0">
@@ -198,14 +204,14 @@
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
                                 {% elif notf.notf_type == "post" %}
-                                posted a new post
+                                published a new post
                                 <a href="posts/post-{{notf.notf_post.post_id}}">
                                     {{notf.notf_post}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
                                 {% elif notf.notf_type == "article" %}
                                 published a new article
-                                <a href="posts/post-{{notf.notf_post.post_id}}">
+                                <a href="/article/{{notf.notf_article.id}}">
                                     {{notf.notf_article}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
@@ -218,6 +224,16 @@
                                 {% elif notf.notf_type == "following" %}
                                 started following you
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
+                                {% elif notf.notf_type == "appointment_rejected" %}
+                                    rejected your appointment<a href="{% url 'base:appointment-detail' 'detail' notf.notf_client.id %}">
+                                        here
+                                    </a>
+                                    <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
+                                {% elif notf.notf_type == "appointment_approved" %}
+                                    approved your appointment<a href="{% url 'base:appointment-detail' 'detail' notf.notf_client.id %}">
+                                        here
+                                    </a>
+                                    <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
                                 {% endif %}
                                 <hr>
                                 <p class="time">{{notf.date}}</p>

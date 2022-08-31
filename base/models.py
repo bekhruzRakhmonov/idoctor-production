@@ -135,9 +135,10 @@ class Follower(models.Model):
     @classmethod
     def get_count(cls,user):
         try:
-            followers = cls.objects.get(user=user)
-            followers_count = followers.followers.all().count()
-            return followers_count
+            user_followers = cls.objects.get(user=user)
+            followers_count = user_followers.followers.all().count()
+            anon_followers_count = user_followers.anon_followers.all().count()
+            return followers_count + anon_followers_count
         except Follower.DoesNotExist:
             return 0
 
@@ -225,7 +226,7 @@ class Post(models.Model):
         return f"{self.text}" or f"{self.photo}"
 
     def get_absolute_url(self):
-        return reverse("article-detail", kwargs={"pk":self.pk})  
+        return reverse("base:explore-post", kwargs={"post_id":self.post_id})  
 
     @classmethod
     def get_count(cls,user):
@@ -267,8 +268,10 @@ class ChildCommentArticle(models.Model):
         return self.content
 
 class Like(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="like_post_user",null=True,blank=True)
-    anon_user = models.ForeignKey(AnonUser,on_delete=models.CASCADE,related_name="like_post_anonymous_user",null=True,blank=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="like_user",null=True,blank=True)
+    anon_user = models.ForeignKey(AnonUser,on_delete=models.CASCADE,related_name="like_anon_user",null=True,blank=True)
+    post = models.ForeignKey(Post,on_delete=models.CASCADE,related_name="like_post",null=True,blank=True)
+    article = models.ForeignKey("Article",on_delete=models.CASCADE,related_name="like_article",null=True,blank=True)
     date = models.DateTimeField(auto_now_add=True)
     like = models.BooleanField(default=False)
     
@@ -286,12 +289,8 @@ class Article(models.Model):
     views_count = models.IntegerField(default=0)
     likes_count = models.IntegerField(default=0)
     likes = models.ManyToManyField("Like",related_name="article_likes",blank=True)
-
-    @property
-    def views_count(self):
-        return self.views_count
         
-    @views_count.setter
+    @classmethod
     def increase_views_count(self,pk):
         count = self.objects.get(pk=pk).views_count
         return self.objects.filter(pk=pk).update(views_count=count+1)
@@ -328,6 +327,7 @@ class Notification(models.Model):
     notf_post = models.ForeignKey(Post,on_delete=models.CASCADE,related_name="notf_posts",null=True)
     notf_article = models.ForeignKey(Article,on_delete=models.CASCADE,related_name="notf_article",null=True)
     notf_follower = models.ForeignKey(Follower,on_delete=models.CASCADE,related_name="notf_followers",null=True)
+    notf_client = models.ForeignKey("Client",on_delete=models.CASCADE,related_name="notf_appointmnet",null=True)
     notf_type = models.CharField(max_length=255,choices=notf_types,null=True)
     date = models.DateTimeField(auto_now_add=True,null=True)
 

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<br>
+{% if reject_form %}
+<form method="post">
+	{% csrf_token %}
+	<div class="d-flex justify-content-center justify-content-md-center mb-3">
+		<div class="form-group col-md-4 shadow-sm border rounded p-4 mb-4 bg-white">
+			<h3 style="text-align:center;">Appointment</h3>
+			{{form|crispy}}
+			<button type="submit" class="btn btn-primary mb-3 w-100">Approve</button>
+		</div>
+	</div>
+</form>
+{% else %}
+<div>
+	<div class="d-flex justify-content-center justify-content-md-center mb-3">
+		<div class="form-group col-md-4 shadow-sm border rounded p-4 mb-4 bg-white">
+			<h5>Reason</h5>
+			<p>{{client.reason}}</p>
+
+			{% if client.approved %}
+				<h5>Response from doctor</h5>
+				<p>{{ client.text }}</p>
+			{% endif %}
+			<h5>Status</h5>
+			{% if client.approved %}
+				<b style="color: green;">Approved</b>
+			{% elif client.rejected %}
+				<b style="color: red;">Rejected</b>
+			{% else %}
+				<b style="color: grey;">Pending</b>
+			{% endif %}
+
+			<br>
+			<br>
+			<p>Created at:  <i>{{client.date}}</i></p>
+		</div>
+	</div>
+</div>
+{% endif %}
+{% endblock %}

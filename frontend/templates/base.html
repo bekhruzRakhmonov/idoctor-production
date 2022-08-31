@@ -520,18 +520,30 @@ h2 {
         if (pathname.indexOf("dashboard") !== -1) {
             let postsTab = document.getElementById("posts-tab")
             let articlesTab = document.getElementById("articles-tab")
+            let appointmentsTab = document.getElementById("appointments-tab")
             let posts = document.getElementById("posts")
             let articles = document.getElementById("articles")
+            let appointments = document.getElementById("appointments")
+
             postsTab.addEventListener("click", () => {
-                if (articles.classList.contains("show", "active")) {
-                    posts.classList.add("show", "active")
+                if (articles.classList.contains("show", "active") || appointments.classList.contains("show", "active")) {
                     articles.classList.remove("show", "active")
+                    appointments.classList.remove("show", "active")
+                    posts.classList.add("show", "active")
                 }
             })
             articlesTab.addEventListener("click", () => {
-                if (posts.classList.contains("show", "active")) {
+                if (posts.classList.contains("show", "active") || appointments.classList.contains("show", "active")) {
                     posts.classList.remove("show", "active")
+                    appointments.classList.remove("show", "active")
                     articles.classList.add("show", "active")
+                }
+            })
+            appointmentsTab.addEventListener("click", () => {
+                if (posts.classList.contains("show", "active") || articles.classList.contains("show", "active")) {
+                    posts.classList.remove("show", "active")
+                    articles.classList.remove("show", "active")
+                    appointments.classList.add("show", "active")
                 }
             })
         }
@@ -561,8 +573,6 @@ h2 {
             formData.append("data",JSON.stringify(data))
             xhr.send(formData)*/
 
-            console.log("ROOM NAME",roomName)
-
             let getMessage = document.querySelector("#message-text");
             let chatForm = document.forms["chat"];
             let sendBtn = document.querySelector("#sendBtn");
@@ -570,9 +580,14 @@ h2 {
             let status = document.querySelector("#status")
 
             
+<<<<<<< HEAD
             let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
             let chatSocket = new WebSocket(`${ws_scheme}://${window.location.host}/ws/chat/${roomName}/`);
             console.log(chatSocket)
+=======
+
+            let chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/${roomName}/`);
+>>>>>>> f3f11023d977b2e11e55bfdce9b424e816b0199b
 
             let currentStatus = false
             chatSocket.onopen = (e) => {
@@ -629,7 +644,7 @@ h2 {
                         </div>
                         <div class="img_cont_msg">
                           <img
-                            src="/media/{{request.user.image}}"
+                            src="{{request.user.image.url}}"
                             class="rounded-circle user_img_msg"
                             style="object-fit:cover;"
                           />
@@ -642,7 +657,7 @@ h2 {
                         <div class="d-flex justify-content-start mb-4">
                         <div class="img_cont_msg">
                           <img
-                            src="/media/{{user.image}}"
+                            src="{{user.image.url}}"
                             class="rounded-circle user_img_msg"
                             style="object-fit: cover;"
                           />
@@ -699,119 +714,6 @@ h2 {
                 getMessage.value = ""
             }
         }
-
-        // encode message
-        var Base64 = {
-        _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"+
-        "abcdefghijklmnopqrstuvwxyz0123456789+/=",
-        encode: function(e) {
-            var t = "";
-            var n, r, i, s, o, u, a;
-            var f = 0;
-            e = Base64._utf8_encode(e);
-            while (f < e.length) {
-                n = e.charCodeAt(f++);
-                r = e.charCodeAt(f++);
-                i = e.charCodeAt(f++);
-                s = n >> 2;
-                o = (n & 3) << 4 | r >> 4;
-                u = (r & 15) << 2 | i >> 6;
-                a = i & 63;
-                if (isNaN(r)) {
-                    u = a = 64
-                } else if (isNaN(i)) {
-                    a = 64
-                }
-                t = t +
-                  this._keyStr.charAt(s) +
-                  this._keyStr.charAt(o) +
-                  this._keyStr.charAt(u) +
-                  this._keyStr.charAt(a)
-            }
-            return t
-        },
-        decode: function(e) {
-            var t = "";
-            var n, r, i;
-            var s, o, u, a;
-            var f = 0;
-            e = e.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-            while (f < e.length) {
-                s = this._keyStr.indexOf(e.charAt(f++));
-                o = this._keyStr.indexOf(e.charAt(f++));
-                u = this._keyStr.indexOf(e.charAt(f++));
-                a = this._keyStr.indexOf(e.charAt(f++));
-                n = s << 2 | o >> 4;
-                r = (o & 15) << 4 | u >> 2;
-                i = (u & 3) << 6 | a;
-                t = t + String.fromCharCode(n);
-                if (u != 64) {
-                    t = t + String.fromCharCode(r)
-                }
-                if (a != 64) {
-                    t = t + String.fromCharCode(i)
-                }
-            }
-            t = Base64._utf8_decode(t);
-            return t
-        },
-        _utf8_encode: function(e) {
-            e = e.replace(/\r\n/g, "\n");
-            var t = "";
-            for (var n = 0; n < e.length; n++) {
-                var r = e.charCodeAt(n);
-                if (r < 128) {
-                    t += String.fromCharCode(r)
-                } else if (r > 127 && r < 2048) {
-                    t +=
-                      String.fromCharCode(r >> 6 | 192);
-                    t +=
-                      String.fromCharCode(r & 63 | 128)
-                } else {
-                    t +=
-                      String.fromCharCode(r >> 12 | 224);
-                    t +=
-                      String.fromCharCode(r >> 6 & 63 | 128);
-                    t +=
-                      String.fromCharCode(r & 63 | 128)
-                }
-            }
-            return t
-        },
-        _utf8_decode: function(e) {
-            var t = "";
-            var n = 0;
-            var r = c1 = c2 = 0;
-            while (n < e.length) {
-                r = e.charCodeAt(n);
-                if (r < 128) {
-                    t += String.fromCharCode(r);
-                    n++
-                } else if (r > 191 && r < 224) {
-                    c2 = e.charCodeAt(n + 1);
-                    t += String.fromCharCode(
-                      (r & 31) << 6 | c2 & 63);
-                    
-                    n += 2
-                } else {
-                    c2 = e.charCodeAt(n + 1);
-                    c3 = e.charCodeAt(n + 2);
-                    t += String.fromCharCode(
-                      (r & 15) << 12 | (c2 & 63)
-                      << 6 | c3 & 63);
-                    n += 3
-                }
-            }
-            return t
-        }
-        }
-
-        var str = "This is GeeksForGeeks 454545 # $%678*&^@!";
-
-        let encoded = Base64.encode(str)
-        console.log("Encoded: ",encoded)
-        let decoded = Base64.decode(encoded)
-        console.log("Decoded: ",decoded);
 
         copyPostLink = document.querySelector("#copyPostLink")
         copyPostLink.addEventListener("click",(e) => {

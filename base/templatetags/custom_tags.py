@@ -59,10 +59,9 @@ def check_followed(follower):
     global request
     followed = False
     if not request.user.is_anonymous:
-        request_user = request.user
         try:
             follower = Follower.objects.get(user__exact=follower)
-            if request.user in (follower.followers.all() or follower.anon_followers.all()):
+            if request.user in follower.followers.all() or request.user in follower.anon_followers.all():
                 print(follower.followers.all(),follower.anon_followers.all())
                 followed = True
         except Follower.DoesNotExist:

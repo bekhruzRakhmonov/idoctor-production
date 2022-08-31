@@ -16,23 +16,21 @@
 		          <a href="{% url 'base:article-detail' article.id %}"><small class="text-muted">{{ article.date }}</small></a></h5>
 		        </div>
 		        {% if request.user == article.author %}
-		          <div class="dropdown" style="margin-left: 270px;">
+		          <div class="dropdown" style="margin-left: 390px;">
 		            <i class="fas fa-ellipsis-h" id="dropdownMenuLink" onmouseover="this.style.color='blue'" onmouseout="this.style.color='black'" style="font-size:20px;cursor: pointer;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:20px;cursor: pointer;"></i>
 
 		            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-left: -140px;">
-		              <a class="dropdown-item" href="{% url 'base:edit-article' article.id %}">Edit</a>
-		              <a class="dropdown-item" href="{% url 'base:delete-article' article.id %}">Delete</a>
+				    <a class="dropdown-item" href="{% url 'base:edit-article' article.id %}"><i class="fas fa-edit"></i>  Edit</a>
+				    <a class="dropdown-item" href="{% url 'base:delete-article' article.id %}"><i class="fas fa-trash-alt"></i>  Delete</a>
 		            </div>
 		          </div>
 
 		        {% else %}
-		          <div class="dropdown" style="margin-left: 270px;">
+		          <div class="dropdown" style="margin-left: 390px;">
 		            <i class="fas fa-ellipsis-h" id="dropdownMenuLink" onmouseover="this.style.color='blue'" onmouseout="this.style.color='black'" style="font-size:20px;cursor: pointer;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
 
-		            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-left: -140px;">
-		              <a class="dropdown-item" href="{% url 'base:edit-article' article.id %}">Edit</a>
-		              <a class="dropdown-item" href="{% url 'base:delete-article' article.id %}">Delete</a>
-		              <a class="dropdown-item" href="{% url 'base:saved-messages-detail-create' 'article' article.id %}"><i class="far fa-bookmark"></i>  Save Article</a>
+		            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-left: -140px;"> 
+		              <a class="dropdown-item" href="{% url 'base:saved-messages-detail-create' 'article' article.id %}"><i class="far fa-bookmark"></i>  Add to collections</a>
 		            </div>
 		          </div>
 		        {% endif %}

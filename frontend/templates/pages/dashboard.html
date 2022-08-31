@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 {% block title %}Dashboard | {{request.user.name}} {% endblock %}
 {% block content %}
-	<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <!------ Include the above in your HEAD tag ---------->
@@ -39,11 +39,7 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="profile-img">
-                            <img src="{{request.user.image.url}}" alt=""/>
-                            <div class="file btn btn-lg btn-primary">
-                                Change Photo
-                                <input type="file" name="file">
-                            </div>
+                            <img src="/media/{{request.user.image}}" alt=""/>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -74,6 +70,9 @@
                                 <li class="nav-item">
                                     <a class="nav-link" id="articles-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Articles</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="appointments-tab" data-toggle="tab" href="#appointments" role="tab" aria-controls="profile" aria-selected="false">Appointments</a>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -88,35 +87,67 @@
                             <span>{{user.bio}}</span>
                         </div>
                     </div>
-                    <div class="col-md-8" style="margin-top:-100px;">
+                    <div class="col-md-8" style="margin-top:-10px;">
                         <div class="tab-content profile-tab" id="myTabContent">
                             <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="home-tab">
                                     <div class="row">
-                                        {% for post in posts %}
-                                            <div class="card" style="">
-                                                {% if post.text %}
-                                                    <p>{{post.text}}</p>
-                                                {% endif %}
-                                                <small class="text-muted">{{post.pub_date}}</small>
-                                                {% if post.photo %}
-                                                    <img src="/media/{{post.photo}}" style="max-width: 500px;max-height: 500px;">
-                                                {% endif %}
-                                            </div>
-                                        {% endfor %}
+                                        {% if posts|length > 0 %}
+                                            {% for post in posts %}
+                                                <div class="card" style="">
+                                                    {% if post.text %}
+                                                        <p>{{post.text}}</p>
+                                                    {% endif %}
+                                                    <small class="text-muted">{{post.pub_date}}</small>
+                                                    {% if post.photo %}
+                                                        <img src="/media/{{post.photo}}" style="max-width: 500px;max-height: 500px;">
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <h1>No posts yet</h1>
+                                        {% endif %}
                                     </div>
                                             
                             </div>
                             <div class="tab-pane fade" id="articles" role="tabpanel" aria-labelledby="profile-tab">
-                                {% for article in articles %}
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <a href="{% url 'base:article-detail' article.pk %}" style="cursor: pointer;"><label>{{article.headline}}</label></a>
+                                {% if articles|length > 0 %}
+                                    {% for article in articles %}
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <a href="{% url 'base:article-detail' article.pk %}" style="cursor: pointer;"><label>{{article.headline}}</label></a>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p>{{article.date}}</p>
+                                            </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <p>{{article.date}}</p>
+                                    {% endfor %}
+                                {% else %}
+                                    <h1>No posts yet</h1>
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="appointments" role="tabpanel" aria-labelledby="appointments-tab">
+                                {% if appointments|length > 0 %}
+                                    {% for appointment in appointments %}
+                                        {% if appointment.rejected != True and appointment.approved != True %}
+                                        <div class="row">
+                                            <div class="card" style="    display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
+                                                <div class="details">
+                                                    <h4>Name: {{ appointment.name }}</h4>
+                                                    <p>Reason: {{ appointment.reason }}</p>
+                                                </div>
+                                                <div class="aprrove-reject">
+                                                    <a href="{% url 'base:appointment-detail' 'approve' appointment.id %}"><button class="btn btn-primary" type="button">Approve</button></a>
+                                                    <a href="{% url 'base:appointment-detail' 'reject' appointment.id %}"><button class="btn btn-danger" type="button">Reject</button></a>
+                                                </div>
+                                            </div> 
                                         </div>
-                                    </div>
-                                {% endfor %}
+                                        {% else %}
+                                            <h1>No appointments yet</h1>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <h1>No appointments yet</h1>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

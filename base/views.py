@@ -24,7 +24,18 @@ from django.contrib import messages
 from django.views.decorators.clickjacking import xframe_options_exempt
 from .cookies import set_cookie,b64_decode
 from .models import User, AnonUser, Post, Article, Like, Comment, ChildComment, CommentArticle, ChildCommentArticle, ChatMessage, ChatRoom, Follower, Notification, Client, Appointment, SavedMessages
-from .forms import UserCreationForm, UserLoginForm, UserPasswordChangeForm, UserSetPasswordForm, ChangeUserForm,CreatePostForm, PostCommentForm, CreateArticleForm, AppointmentForm
+from .forms import (
+                    UserCreationForm, 
+                    UserLoginForm, 
+                    UserPasswordChangeForm, 
+                    UserSetPasswordForm, 
+                    ChangeUserForm,
+                    CreatePostForm, 
+                    PostCommentForm, 
+                    CreateArticleForm, 
+                    AppointmentForm,
+                    AppointmentApproveForm
+                )
 import json
 import threading
 import base64
@@ -87,7 +98,7 @@ class Main(View):
             if request.user.is_authenticated:
                 notifications = Notification.objects.filter(to_user__exact=request.user).order_by("-date")
             else:
-                notifications = Notification.objects.all()
+                notifications = Notification.objects.filter(to_anon_user__exact=request.user).order_by("-date")
             post_form = CreatePostForm(request.user)
             comment_form = PostCommentForm
             context["notifications"] = notifications
@@ -100,7 +111,7 @@ class Main(View):
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         users = User.objects.all()
-        post = Post.objects.all()
+        post = Post.objects.all().order_by("-pub_date")
         comments = Comment.objects.all()
         likes = Like.objects.all()
         notifications = Notification.objects.filter(to_user__exact=request.user).order_by("-date")
@@ -131,7 +142,7 @@ class EditPostView(UpdateView):
     template_name = "pages/edit_post.html"
     context_object_name = "form"
     pk_url_kwarg = "post"
-    success_url = reverse_lazy("base:main")
+    #success_url = reverse_lazy("base:main")
 
     def get_object(self):
         obj = super().get_object()
@@ -146,7 +157,7 @@ class DeletePostView(DeleteView):
     model = Post
     template_name = "pages/posts/post_confirm_delete.html"
     pk_url_kwarg = "post"
-    success_url = reverse_lazy("main")
+    success_url = reverse_lazy("base:main")
 
     def get_object(self):
         obj = super().get_object()
@@ -361,6 +372,11 @@ class ArticleDetailView(generic.detail.DetailView):
     template_name = "pages/article_detail.html"
     context_object_name = "article"
     query_pk_and_slug = True
+    
+    def get(self,request,*args,**kwargs):
+        article = self.get_object()
+        Article.increase_views_count(pk=article.id)
+        return super().get(request,*args,**kwargs)
 
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
@@ -386,7 +402,7 @@ class EditArticleView(LoginRequiredMixin,UpdateView):
     template_name = "pages/articles/edit_article.html"
     context_object_name = "form"
     pk_url_kwarg = "pk"
-    success_url = reverse_lazy("main")
+    # success_url = reverse_lazy("base:main")
 
     def get_object(self):
         obj = super().get_object()
@@ -401,7 +417,7 @@ class DeleteArticleView(LoginRequiredMixin,DeleteView):
     model = Article
     template_name = "pages/articles/article_confirm_delete.html"
     pk_url_kwarg = "article"
-    success_url = reverse_lazy("main")
+    success_url = reverse_lazy("base:articles")
 
     def get_object(self):
         obj = super().get_object()
@@ -530,6 +546,7 @@ class DashboardView(LoginRequiredMixin, View, ContextMixin):
             "posts": ctx["posts"],
             "posts_count": ctx["posts_count"],
             "articles": ctx["articles"],
+            "appointments": ctx["appointments"],
             "articles_count": ctx["articles_count"],
             "form":form,
         }
@@ -562,6 +579,7 @@ class DashboardView(LoginRequiredMixin, View, ContextMixin):
             "posts": ctx["posts"],
             "posts_count": ctx["posts_count"],
             "articles": ctx["articles"],
+            "appointments": ctx["appointments"],
             "articles_count": ctx["articles_count"],
             "form":form,
         }
@@ -575,6 +593,8 @@ class DashboardView(LoginRequiredMixin, View, ContextMixin):
         context["posts"] = Post.objects.filter(owner__exact=self.request.user)
         context["posts_count"] = Post.get_count(self.request.user)
         context["articles"] = Article.objects.filter(author__exact=self.request.user)
+        appointment = Appointment.objects.filter(doctor__exact=self.request.user).first()
+        context["appointments"] = appointment.clients.all()
         context["articles_count"] = Article.get_count(author=self.request.user)
         
         return context
@@ -703,25 +723,72 @@ class FollowView(View):
                     Follower.unfollow(user=user, follower=request.user)
                 else:
                     raise FollowerError("UserDoesNotExist")
-            if request.user.is_anon:
+            elif request.user.is_anon:
                 follower = Follower.objects.get(user=user)
                 followers = follower.anon_followers.all()
                 if request.user in followers:
                     Follower.unfollow(user=user, follower=request.user)
                 else:
                     raise FollowerError("UserDoesNotExist")
+            else:
+                messages.warning(request,"You should register as doctor or client")
         except (FollowerError,Follower.DoesNotExist):
             if request.user.is_authenticated:
                 if not user == request.user:
                     Follower.follow(user=user, follower=request.user)
-            if request.user.is_anon:
+            elif request.user.is_anon:
                 Follower.follow(user=user, follower=request.user)
+            else:
+                messages.warning(request,"You should register as doctor or client")   
         return redirect(path)
 
 # Video Stream
 class LiveStreamView(View):
     def get(self,request,*args,**kwargs):
         return render(request,"pages/video_stream.html")
+
+class AppointmentView(View):
+    def get(self,request,response_type,client_id):
+        path = request.META.get('HTTP_REFERER')
+
+        if response_type == "reject":
+            appointment = Appointment.objects.filter(doctor__exact=request.user).first()
+            for client in appointment.clients.all():
+                if client.id == client_id:
+                    if client.approved or client.rejected:
+                        return redirect(path)
+                    client.rejected = True
+                    client.save()
+                    Notification.objects.create(from_user=request.user,to_anon_user=client.client,notf_client=client,notf_type="appointment_rejected")
+                    break
+
+            messages.info(request,"Appointment successfully rejected")
+
+            return redirect(path)
+
+        elif response_type == "approve":
+            return render(request,"pages/appointment_detail.html",{"form": AppointmentApproveForm(),"reject_form":True})
+
+        else:
+            client = Client.objects.get(id=client_id)
+            return render(request,"pages/appointment_detail.html",{"client": client})
+
+    def post(self,request,response_type,client_id):
+        appointment = Appointment.objects.filter(doctor__exact=request.user).first()
+        form = AppointmentApproveForm(request.POST)
+
+        if form.is_valid():
+            for client in appointment.clients.all():
+                if client.id == client_id:
+                    client.approved = True
+                    client.text = form.cleaned_data.get("text")
+                    client.save()
+                    Notification.objects.create(from_user=request.user,to_anon_user=client.client,notf_client=client,notf_type="appointment_approved")
+                    break
+
+            messages.info(request,"Appointment successfully approved")
+            return redirect("base:dashboard",slugify(request.user.name),request.user.pk)
+
 
 # To make appointment with doctor.
 class MakeAppointmentView(View,ContextMixin):
@@ -731,24 +798,27 @@ class MakeAppointmentView(View,ContextMixin):
         except Appointment.DoesNotExist:
             return None
 
+    def check_user(self,request,*args,**kwargs):
+        if not request.user.is_anon:
+            raise Http404("Page not found")
+
     def get(self,request,*args,**kwargs):
+        self.check_user(request)
         doctor_id = kwargs.get("doctor_id",None)
         doctor = self.get_doctor(doctor_id)
         appointment = self.get_appointment(doctor)
         button_name = "Make Appointment"
         context = {
-            "form": AppointmentForm,
+            "form": AppointmentForm(),
             "button_name": button_name,
         }
         ip = get_client_ip(request)
-        response = render(request,"pages/appointment.html")
-        get_cookie(request,response,ip)
         if request.user.is_anon:
             if appointment is not None:
                 appointments = appointment.clients.filter(client=request.user)
                 if len(appointments) > 0:
-                    context["button_name"] = "Update Appointment"
-                    form = AppointmentForm(initial={"reason": appointments[0].reason})
+                    context["has_created"] = True
+                    form = AppointmentForm(initial={"name": appointments[0].name,"reason": appointments[0].reason})
                     context["form"] = form
         return render(request,"pages/appointment.html",context)
 
@@ -759,21 +829,23 @@ class MakeAppointmentView(View,ContextMixin):
             raise Http404("Doctor not found.")
 
     def post(self,request,*args,**kwargs):
+        self.check_user(request)
         doctor_id = kwargs.get("doctor_id",None)
         form = AppointmentForm(request.POST)
-        button_name = "Upadate Button"
         context = {
             "form": form,
-            "button_name": button_name,
+            "has_created": True,
         }
         if doctor_id is not None:
             doctor = self.get_doctor(doctor_id)
             if form.is_valid(): 
                 reason = form.cleaned_data.get("reason")
+                name = form.cleaned_data.get("name")
                 if request.user.is_anon:
                     appointment,created = Appointment.objects.get_or_create(doctor=doctor)
+                    print("Appointment created")
                     if created:
-                        client = Client.objects.create(client=request.user,reason=reason)
+                        client = Client.objects.create(client=request.user,doctor=doctor,name=name,reason=reason)
                         appointment.clients.add(client)
                         appointment.save()
                     else:
@@ -782,16 +854,87 @@ class MakeAppointmentView(View,ContextMixin):
                         appointment = Client.objects.get(id=appointment_id)
                         appointment.reason = reason
                         appointment.save()
+                    messages.success(request,"Your appointment saved successfully")
                 elif request.user.is_anonymous:
                     messages.info(request,"You should register as doctor or client.")
         return render(request,"pages/appointment.html",context)
+
+# To make appointment with doctor.
+class MakeAppointmentView(View,ContextMixin):
+    def get_appointment(self,doctor):
+        try:
+            return Appointment.objects.get(doctor=doctor)
+        except Appointment.DoesNotExist:
+            return None
+
+    def check_user(self,request,*args,**kwargs):
+        if not request.user.is_anon:
+            raise Http404("Page not found")
+
+    def get(self,request,*args,**kwargs):
+        self.check_user(request)
+        doctor_id = kwargs.get("doctor_id",None)
+        doctor = self.get_doctor(doctor_id)
+        appointment = self.get_appointment(doctor)
+        button_name = "Make Appointment"
+        context = {
+            "form": AppointmentForm(),
+            "button_name": button_name,
+        }
+        ip = get_client_ip(request)
+        if request.user.is_anon:
+            if appointment is not None:
+                appointments = appointment.clients.filter(client=request.user)
+                if len(appointments) > 0:
+                    context["has_created"] = True
+                    form = AppointmentForm(initial={"name": appointments[0].name,"reason": appointments[0].reason})
+                    context["form"] = form
+        return render(request,"pages/appointment.html",context)
+
+    def get_doctor(self,doctor_id):
+        try:
+            return User.objects.get(id=doctor_id)
+        except User.DoesNotExist:
+            raise Http404("Doctor not found.")
+
+    def post(self,request,*args,**kwargs):
+        self.check_user(request)
+        doctor_id = kwargs.get("doctor_id",None)
+        form = AppointmentForm(request.POST)
+        context = {
+            "form": form,
+            "has_created": True,
+        }
+        if doctor_id is not None:
+            doctor = self.get_doctor(doctor_id)
+            if form.is_valid(): 
+                reason = form.cleaned_data.get("reason")
+                name = form.cleaned_data.get("name")
+                if request.user.is_anon:
+                    appointment,created = Appointment.objects.get_or_create(doctor=doctor)
+                    print("Appointment created")
+                    if created:
+                        client = Client.objects.create(client=request.user,doctor=doctor,name=name,reason=reason)
+                        appointment.clients.add(client)
+                        appointment.save()
+                    else:
+                        appointments = appointment.clients.filter(client=request.user)
+                        appointment_id = appointments[0].id
+                        appointment = Client.objects.get(id=appointment_id)
+                        appointment.reason = reason
+                        appointment.save()
+                    messages.success(request,"Your appointment saved successfully")
+                elif request.user.is_anonymous:
+                    messages.info(request,"You should register as doctor or client.")
+        return render(request,"pages/appointment.html",context)
+
 
 # To save saved_messages
 class SavedMessagesView(ListView):
     model = SavedMessages
     template_name = "pages/collections.html"
     context_object_name = "saved_messages"
-    paginate_by = 2
+    paginate_by = 2 
 
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
@@ -809,7 +952,7 @@ class SavedMessagesDetailAndCreateView(View):
         elif message_type == "article":
             self.create_article_message(request,message_id)
 
-        return redirect("base:main")
+        return redirect("base:saved-messages")
 
     def get_post(self,post_id):
         try:

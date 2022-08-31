@@ -2,20 +2,42 @@
 {% load custom_tags %}
 
 {% block content %}
+    <div style="text-align: center;">
+      {% if messages %}
+        {% for message in messages %}
+          {% if message.level == 30 %}
+            <p style="color: red;">{{ message }}<a href="{% url 'base:auto-anonuser-login' %}"></a></p>
+            <p> Please <a href="{% url 'base:auto-anonuser-login' %}">click</a> to login</p>
+          {% elif message.level == 40 %}
+            <p style="color: red;">{{ message }}<a href="{% url 'base:auto-anonuser-login' %}"></a></p>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </div>
     <div class="container card" style="width:650px;">
       <div style="display: flex;margin-top: 10px;">
         <img src="{{article.author.image.url}}" style="width:55px;height: 55px;border-radius: 100%;object-fit: cover;">
         <div>
           <h4><b>Dr.</b>{{article.author.name}}</h4>
-          <a href="{% url 'base:article-detail' article.id %}"><small class="text-muted">{{ article.date }}</small></a></h5>
+	  <a href="{% url 'base:article-detail' article.id %}"><small class="text-muted">{{ article.date }} <i class="fa fa-eye" aria-hidden="true"></i>     {{article.views_count}}</small></a>
         </div>
         {% if request.user == article.author %}
-          <div class="dropdown" style="margin-left: 270px;">
+          <div class="dropdown" style="margin-left: 370px;">
             <i class="fas fa-ellipsis-h" id="dropdownMenuLink" onmouseover="this.style.color='blue'" onmouseout="this.style.color='black'" style="font-size:20px;cursor: pointer;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:20px;cursor: pointer;"></i>
 
             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-left: -140px;">
-              <a class="dropdown-item" href="{% url 'base:edit-article' article.id %}">Edit</a>
-              <a class="dropdown-item" href="{% url 'base:delete-article' article.id %}">Delete</a>
+              <a class="dropdown-item" href="{% url 'base:edit-article' article.id %}"><i class="fas fa-edit"></i> Edit</a>
+              <a class="dropdown-item" href="{% url 'base:delete-article' article.id %}"><i class="fas fa-trash-alt"></i> Delete</a>
+              <a class="dropdown-item" href="{% url 'base:saved-messages-detail-create' 'article' article.id %}"><i class="far fa-bookmark"></i>  Add to collections</a>
+            </div>
+          </div>
+
+        {% else %}
+          <div class="dropdown" style="margin-left: 370px;">
+            <i class="fas fa-ellipsis-h" id="dropdownMenuLink" onmouseover="this.style.color='blue'" onmouseout="this.style.color='black'" style="font-size:20px;cursor: pointer;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-left: -140px;">
+              <a class="dropdown-item" href="{% url 'base:saved-messages-detail-create' 'article' article.id %}"><i class="far fa-bookmark"></i>  Add to collections</a>
             </div>
           </div>
         {% endif %}
@@ -66,7 +88,14 @@
       </div>
     </div>
     </div>
-    {% for related_article in related_articles %}
-      <h1>{{related_article.headline}}</h1>
-    {% endfor %}
+    <hr style="margin-left:100px;margin-right:100px;">
+    <div style="margin-left: 300px; margin-right: 300px;">
+      <h2 style="margin-left: 200px;margin-right: 200px;">Related articles</h2>
+      <div>
+        {% for related_article in related_articles %}
+          <a href="{% url 'base:article-detail' related_article.id %}"><h5>{{related_article.headline}}</h5></a>
+          {{article.body|safe|truncatechars:400}}
+        {% endfor %}
+      </div>
+    </div>
 {% endblock %}
