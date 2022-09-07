@@ -48,6 +48,7 @@ def handle_comment(sender,*args,**kwargs):
 
 @receiver(post_save,sender=CommentArticle)
 def handle_comment(sender,*args,**kwargs):
+    print("IIIIII HANDLE ITTTTTTTTTTTTTTTTTTTTTTTT")
     instance = kwargs["instance"]
     if instance.user is not None and instance.user != instance.article.author:
         obj,created = Notification.objects.get_or_create(from_user=instance.user,to_user=instance.article.author,notf_comment_article=instance,notf_type="comment_article")

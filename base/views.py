@@ -465,11 +465,14 @@ class LikeArticleView(View):
                     messages.warning(request,"You should login as doctor or client")
             except Like.DoesNotExist:
                 if request.user.is_authenticated:
-                    like = Like.objects.create(user=request.user,like=True)
+                    like = Like.objects.create(user=request.user,article=article,like=True)
                     article.likes.add(like)
                 elif request.user.is_anon:
-                    like = Like.objects.create(anon_user=request.user,like=True)
+                    like = Like.objects.create(anon_user=request.user,article=article,like=True)
                     article.likes.add(like)
+                else:
+                    messages.warning(request,"You should login as doctor or client")
+
             return response
         raise PermissionDenied("Invalid url.")
 
@@ -519,16 +522,15 @@ class LikePostView(View):
                     #like.delete()
             except Like.DoesNotExist:
                 if request.user.is_authenticated:
-                    like = Like.objects.create(user=request.user,like=True)
+                    like = Like.objects.create(user=request.user,post=post,like=True)
                     post.likes.add(like)
 
                 # Check the user is anonymous and have registered by custom AnonUser model
                 elif request.user.is_anon:
-                    like = Like.objects.create(anon_user=request.user,like=True)
+                    like = Like.objects.create(anon_user=request.user,post=post,like=True)
                     post.likes.add(like)
                 else:
-                    like = Like.objects.create(anon_user=request.user,like=True)
-                    post.likes.add(like)
+                    messages.warning(request,"You should login as doctor or client")
 
             return response
         raise PermissionDenied("Invalid url.")

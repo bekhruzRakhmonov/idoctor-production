@@ -83,13 +83,13 @@
                                     {% endif %}
                                 </a>
                                 {% if notf.notf_type == "comment" %} wrote comment to your post
-                                <a href="/posts/post-{{notf.notf_comment.post.post_id}}">
+                                <a href="{% url 'base:explore-post' notf.notf_comment.post.post_id %}>
                                     {{notf.notf_comment.post}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
                                 {% elif notf.notf_type == "like" %}
                                 liked to your post
-                                <a href="posts/post-{{notf.notf_comment.post.post_id}}">
+				<a href="{% url 'base:explore-post' notf.notf_like.post.post_id %}">
                                     {{notf.notf_like.post}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
@@ -193,19 +193,19 @@
                             <div class="col-md-9 col-sm-9 col-xs-9 pd-l0">
                                 <a href="">{{notf.from_user}}</a>
                                 {% if notf.notf_type == "comment" %} wrote comment to your post
-                                <a href="posts/post-{{notf.notf_comment.post.post_id}}">
+                                <a href="{% url 'base:explore-post' notf.notf_comment.post_id %}">
                                     {{notf.notf_comment.post}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
                                 {% elif notf.notf_type == "like" %}
                                 liked to your post
-                                <a href="posts/post-{{notf.notf_comment.post.post_id}}">
+                                <a href="{% url 'base:explore-post' notf.notf_like.post.post_id %}>
                                     {{notf.notf_like.post}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
                                 {% elif notf.notf_type == "post" %}
                                 published a new post
-                                <a href="posts/post-{{notf.notf_post.post_id}}">
+                                <a href="{% url 'base:explore-post' notf.notf_post.post_id %}">
                                     {{notf.notf_post}}
                                 </a>
                                 <a href="" class="rIcon"><i class="fa fa-dot-circle-o"></i></a>
@@ -260,14 +260,13 @@
                 <span class="dropdown-item">{{request.user.name}}</span>
                 <a class="dropdown-item" href="#">Settings</a>
                 <a class="dropdown-item" href="{% url 'base:saved-messages' %}">Collections</a>
-                <a class="dropdown-item" href="{% url 'base:logout' %}">Log Out</a>
             </div>
         </div>
         {% else %}
         <div
             style="display: flex;flex-direction: row;flex-wrap: wrap;align-content: stretch;justify-content: space-evenly;align-items: center;">
             <div>
-                <a class="mr-5" id="home" href="#" style="color:black;"><i class="fas fa-home"
+                <a class="mr-5" id="home" href="/" style="color:black;"><i class="fas fa-home"
                         style="font-size:26px;"></i></a>
                         
                 <a class="mr-5" id="article" href="{% url 'base:articles' %}" style="color:black;"><i class="fas fa-newspaper" style="font-size:26px;"></i></a>

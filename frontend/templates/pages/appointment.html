@@ -3,7 +3,7 @@
 
 {% block content %}
 <style type="text/css">
-	#id_reason{
+	.appointment-reason{
 		width: 100%;
 	}
 </style>
@@ -20,10 +20,16 @@
 	<div class="d-flex justify-content-center justify-content-md-center mb-3">
 		<div class="form-group col-md-4 shadow-sm border rounded p-4 mb-4 bg-white">
 			<h3 style="text-align:center;">Reason</h3>
-			{{ form.reason }}
+			{{ form.name | as_crispy_field }}
+			{{ form.reason | as_crispy_field }}
 			<div class="valid-feedback"></div>
-			<!-- <div class="invalid-feedback">Please fill out this field now.</div> -->
-			<button type="submit" class="btn btn-primary mb-3 w-100">{{button_name}}</button>
+
+			{% if has_created %}
+				<button type="submit" class="btn btn-primary mb-3 w-100">Update Appointment</button>
+			{% else %}
+				<button type="submit" class="btn btn-primary mb-3 w-100">Make Appointment</button>
+			{% endif %}
+			<a href="btn"><button type="button" class="btn btn-danger mb-3 w-100">Delete Appointment</button></a>
 		</div>
 	</div>
 </form>
