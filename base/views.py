@@ -931,6 +931,23 @@ class MakeAppointmentView(View,ContextMixin):
                     messages.info(request,"You should register as doctor or client.")
         return render(request,"pages/appointment.html",context)
 
+# list appointments
+class ListAppointmentsView(View):
+    def get(self,request):
+        if request.user.is_anonymous:
+            return Http404
+        
+        if request.user.is_anon:
+            appointments = Client.objects.filter(client=request.user)
+        
+        elif request.user.is_authenticated:
+            appointments = Appointment.objects.get(doctor=request.user)
+
+        context = {
+            "appointments": appointments,
+            "appointments_count": len(appointments),
+        }
+        return render(request,"pages/appointment_list.html",context)
 
 # To save saved_messages
 class SavedMessagesView(ListView):

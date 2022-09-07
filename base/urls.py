@@ -41,9 +41,10 @@ urlpatterns = [
 	path('users/<str:username>/<str:user_id>/',views.UserProfileShowcaseView.as_view(),name="user-profile-showcase"),
 	path('follow/<str:name>/<str:user_id>/',views.FollowView.as_view(),name="follow"),
 
-	# making appoinment urls here
+	# appoinment urls here
 	path('appointment/detail/<str:response_type>/<int:client_id>/',views.AppointmentView.as_view(),name="appointment-detail"),
 	path('appointment/<doctor_id>/',views.MakeAppointmentView.as_view(),name="appointment"),
+    path('appointments/list/',views.ListAppointmentsView.as_view(),name="appointments-list"),
 
 	# chat
 	path('chat/',views.ChatRoomView.as_view(),name="chat-room"),

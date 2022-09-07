@@ -260,6 +260,7 @@
                 <span class="dropdown-item">{{request.user.name}}</span>
                 <a class="dropdown-item" href="#">Settings</a>
                 <a class="dropdown-item" href="{% url 'base:saved-messages' %}">Collections</a>
+		<a class="dropdown-item" href="{% url 'base:appointments-list' %}">Appoinments</a>
             </div>
         </div>
         {% else %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+{% if appointments_count != 0 %}
+<div class="d-flex justify-content-center justify-content-md-center mb-3" style="flex-direction: column;align-items: center;">
+   <h3 style="text-align:center;">Appointments</h3>
+   {% for appointment in appointments %}
+   <div class="form-group col-md-4 shadow-sm border rounded p-4 mb-4 bg-white">
+	<b>Doctor:</b>  <span><a href="{% url 'base:user-profile-showcase' appointment.doctor.name appointment.doctor.id %}">{{ appointment.doctor.name }}</a></span>
+	<h5>Reason</h5>
+	<p>{{appointment.reason}}</p>
+
+{% if appointment.approved %}
+	<h5>Response from doctor</h5>
+	<p>{{ appointment.text }}</p>
+{% endif %}
+	<h5>Status</h5>
+{% if appointment.approved %}
+	<b style="color: green;">Approved</b>
+{% elif appointment.rejected %}
+	<b style="color: red;">Rejected</b>
+{% else %}
+	<b style="color: grey;">Pending</b>
+{% endif %}
+
+<br>
+<br>
+<p>Created at:  <i>{{appointment.date}}</i></p>
+
+<span><a href="{% url 'base:appointment' appointment.doctor.id %}">Edit</a></span>
+   </div>
+   {% endfor %}
+</div> 
+{% else %}
+   <h1 style="text-align: center;">No appointments yet</h1>
+{% endif %}
+
+{% endblock %}
