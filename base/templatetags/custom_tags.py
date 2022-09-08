@@ -69,7 +69,3 @@ def check_followed(follower):
         return followed
     return followed
 
-@register.inclusion_tag("components/recommended_users.html",takes_context=True)
-def get_context(context):
-    print(context["users"])
-    return {"userss":context["users"]}
