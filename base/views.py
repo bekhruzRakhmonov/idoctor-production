@@ -915,20 +915,22 @@ class MakeAppointmentView(View,ContextMixin):
                 name = form.cleaned_data.get("name")
                 if request.user.is_anon:
                     appointment,created = Appointment.objects.get_or_create(doctor=doctor)
-                    print("Appointment created")
-                    if created:
+                    clients = appointment.clients.filter(client__exact=request.user)
+                    if created or len(clients) == 0:
                         client = Client.objects.create(client=request.user,doctor=doctor,name=name,reason=reason)
                         appointment.clients.add(client)
                         appointment.save()
-                    else:
-                        appointments = appointment.clients.filter(client=request.user)
-                        appointment_id = appointments[0].id
-                        appointment = Client.objects.get(id=appointment_id)
-                        appointment.reason = reason
-                        appointment.save()
+                    else: 
+                        if len(clients) > 0:
+                            appointment_id = clients[0].id
+                            appointment = Client.objects.get(id=appointment_id)
+                            appointment.reason = reason
+                            appointment.save()
                     messages.success(request,"Your appointment saved successfully")
                 elif request.user.is_anonymous:
                     messages.info(request,"You should register as doctor or client.")
+                else: 
+                    return Http404
         return render(request,"pages/appointment.html",context)
 
 # list appointments
@@ -938,7 +940,7 @@ class ListAppointmentsView(View):
             return Http404
         
         if request.user.is_anon:
-            appointments = Client.objects.filter(client=request.user)
+            appointments = Client.objects.filter(client=request.user).order_by("-date")
         
         elif request.user.is_authenticated:
             appointments = Appointment.objects.get(doctor=request.user)
