@@ -17,11 +17,11 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [".herokuapp.com"]
+ALLOWED_HOSTS = ["vidoctor.uz"]
 
 # Application definition
 
-CSRF_TRUSTED_ORIGINS = ["https://idoctoruz.herokuapp.com/"]
+CSRF_TRUSTED_ORIGINS = ["https://vidoctor.uz"]
 
 ALLOWED_HOSTS = ["18.133.138.104","127.0.0.1","localhost","vidoctor.uz"]
 
@@ -106,8 +106,7 @@ CHANNEL_LAYERS = {
     },
 }
 # cors headers
-CORS_ALLOW_ALL_ORIGINS = True
-#CORS_ALLOWED_ORIGINS = ["http://idoctor.eba-3ftk9ahp.us-east-1.elasticbeanstalk.com"]
+CORS_ALLOWED_ORIGINS = ["https://vidoctor.uz"]
 
 # rest_framework
 
@@ -218,8 +217,8 @@ MEDIA_URL = "https://idoctor.s3.eu-west-2.amazonaws.com/"
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-AWS_ACCESS_KEY_ID = 'AKIA2ETB2ID7VBVMMVNI' #'AKIA2ETB2ID7367OF2U4'
-AWS_SECRET_ACCESS_KEY = '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' #'8hykLbj2s0/VvbZfJt3rCEJLntNpOR85AGdDA5YX'
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = 'idoctor'
 AWS_QUERYSTRING_AUTH = False
 
@@ -249,8 +248,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGIN_URL = "/login/"
-# LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/login/"
+LOGOUT_REDIRECT_URL = "/"
 
 # ATOMIC_REQUESTS = True
 # AUTOCOMMIT = False
