@@ -1,5 +1,5 @@
 # iDoctor
-It is platform for doctors and their patients. This platform helps them to interact with each others. And also I am gonna to add new feature which helps doctors to exchange their big data with their colleagues. 
+It is platform for doctors and their patients. This platform helps them to interact with each others. It has a lot of features like, writing post or article, making appointment with doctor and real time chatting between doctors. And also I am gonna to add new feature which helps doctors to exchange their big data with their colleagues. 
 Live at: https://vidoctor.uz
 
 ## Demo
